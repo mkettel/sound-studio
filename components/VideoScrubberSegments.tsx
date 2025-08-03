@@ -449,61 +449,123 @@ export default function VideoScrubberSegments({
             }}
           />
           
-          {/* Navigation Buttons */}
+          {/* Navigation Buttons - Positioned like the mockup */}
           {isLoaded && (
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-6 z-10">
-              {segments.map((segment) => (
-                <button
-                  key={segment.id}
-                  onClick={() => navigateToSegment(segment)}
-                  disabled={isTransitioning && activeSegment === segment.id}
-                  className={`
-                    relative px-6 py-3 text-sm font-medium tracking-wide
-                    transition-all duration-300 ease-out
-                    border-2 backdrop-blur-md
-                    ${activeSegment === segment.id 
-                      ? 'bg-white/20 border-white text-white shadow-lg scale-105' 
-                      : 'bg-black/30 border-white/40 text-white/80 hover:bg-white/10 hover:border-white/60 hover:text-white'
-                    }
-                    ${isTransitioning && activeSegment === segment.id ? 'cursor-wait' : 'cursor-pointer'}
-                    rounded-sm uppercase
-                    hover:scale-105 active:scale-95
-                    shadow-2xl
-                    disabled:opacity-90
-                  `}
-                  style={{
-                    textShadow: '0 1px 2px rgba(0,0,0,0.8)',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
-                  }}
-                >
-                  <div className="relative z-10">
-                    {segment.label}
+            <div className="absolute bottom-0 left-0 right-0 z-10">
+              {/* Background bar for buttons */}
+              <div className="bg-gradient-to-t from-black/80 via-black/60 to-transparent h-32 flex items-end">
+                <div className="w-full flex justify-center pb-8">
+                  <div className="flex gap-8">
+                    {/* Left Record Button */}
+                    <div className="flex flex-col items-center">
+                      <button
+                        onClick={() => navigateToSegment(segments[0])}
+                        disabled={isTransitioning && activeSegment === segments[0].id}
+                        className={`
+                          relative px-8 py-4 text-xs font-bold tracking-widest
+                          transition-all duration-300 ease-out
+                          border backdrop-blur-sm
+                          ${activeSegment === segments[0].id 
+                            ? 'bg-amber-500/30 border-amber-400/80 text-amber-100 shadow-lg shadow-amber-500/20' 
+                            : 'bg-stone-800/40 border-stone-400/60 text-stone-200 hover:bg-stone-700/50 hover:border-stone-300'
+                          }
+                          ${isTransitioning && activeSegment === segments[0].id ? 'cursor-wait' : 'cursor-pointer'}
+                          rounded-none uppercase
+                          hover:shadow-lg hover:shadow-white/10
+                          active:scale-95
+                          disabled:opacity-90
+                        `}
+                        style={{
+                          textShadow: '0 1px 3px rgba(0,0,0,0.8)',
+                          fontFamily: 'monospace',
+                          letterSpacing: '0.2em'
+                        }}
+                      >
+                        <div className="relative z-10">
+                          LEFT RECORD
+                        </div>
+                        
+                        {/* LED-style indicator */}
+                        {activeSegment === segments[0].id && (
+                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse shadow-lg shadow-amber-400/50" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Control Panel Button */}
+                    <div className="flex flex-col items-center">
+                      <button
+                        onClick={() => navigateToSegment(segments[1])}
+                        disabled={isTransitioning && activeSegment === segments[1].id}
+                        className={`
+                          relative px-8 py-4 text-xs font-bold tracking-widest
+                          transition-all duration-300 ease-out
+                          border backdrop-blur-sm
+                          ${activeSegment === segments[1].id 
+                            ? 'bg-amber-500/30 border-amber-400/80 text-amber-100 shadow-lg shadow-amber-500/20' 
+                            : 'bg-stone-800/40 border-stone-400/60 text-stone-200 hover:bg-stone-700/50 hover:border-stone-300'
+                          }
+                          ${isTransitioning && activeSegment === segments[1].id ? 'cursor-wait' : 'cursor-pointer'}
+                          rounded-none uppercase
+                          hover:shadow-lg hover:shadow-white/10
+                          active:scale-95
+                          disabled:opacity-90
+                        `}
+                        style={{
+                          textShadow: '0 1px 3px rgba(0,0,0,0.8)',
+                          fontFamily: 'monospace',
+                          letterSpacing: '0.2em'
+                        }}
+                      >
+                        <div className="relative z-10">
+                          CONTROL PANEL
+                        </div>
+                        
+                        {/* LED-style indicator */}
+                        {activeSegment === segments[1].id && (
+                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse shadow-lg shadow-amber-400/50" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Right Record Button */}
+                    <div className="flex flex-col items-center">
+                      <button
+                        onClick={() => navigateToSegment(segments[2])}
+                        disabled={isTransitioning && activeSegment === segments[2].id}
+                        className={`
+                          relative px-8 py-4 text-xs font-bold tracking-widest
+                          transition-all duration-300 ease-out
+                          border backdrop-blur-sm
+                          ${activeSegment === segments[2].id 
+                            ? 'bg-amber-500/30 border-amber-400/80 text-amber-100 shadow-lg shadow-amber-500/20' 
+                            : 'bg-stone-800/40 border-stone-400/60 text-stone-200 hover:bg-stone-700/50 hover:border-stone-300'
+                          }
+                          ${isTransitioning && activeSegment === segments[2].id ? 'cursor-wait' : 'cursor-pointer'}
+                          rounded-none uppercase
+                          hover:shadow-lg hover:shadow-white/10
+                          active:scale-95
+                          disabled:opacity-90
+                        `}
+                        style={{
+                          textShadow: '0 1px 3px rgba(0,0,0,0.8)',
+                          fontFamily: 'monospace',
+                          letterSpacing: '0.2em'
+                        }}
+                      >
+                        <div className="relative z-10">
+                          RIGHT RECORD
+                        </div>
+                        
+                        {/* LED-style indicator */}
+                        {activeSegment === segments[2].id && (
+                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse shadow-lg shadow-amber-400/50" />
+                        )}
+                      </button>
+                    </div>
                   </div>
-                  
-                  {/* Button glow effect */}
-                  <div 
-                    className={`
-                      absolute inset-0 rounded-sm transition-opacity duration-300
-                      ${activeSegment === segment.id ? 'opacity-100' : 'opacity-0 hover:opacity-50'}
-                    `}
-                    style={{
-                      background: 'linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))',
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2)'
-                    }}
-                  />
-                  
-                  {/* Progress indicator for active button during transition */}
-                  {isTransitioning && activeSegment === segment.id && (
-                    <div 
-                      className="absolute bottom-0 left-0 h-0.5 bg-white transition-all duration-100 ease-out"
-                      style={{
-                        width: `${transitionProgress * 100}%`,
-                        boxShadow: '0 0 8px rgba(255,255,255,0.6)'
-                      }}
-                    />
-                  )}
-                </button>
-              ))}
+                </div>
+              </div>
             </div>
           )}
 
