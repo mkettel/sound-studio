@@ -2,7 +2,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Video Scrubbing Demo',
+  title: 'AUW Sound Studio Demo',
   description: 'Scroll and mouse-controlled video playback',
 }
 
