@@ -1,91 +1,122 @@
 "use client";
 
-import VideoScrubber from "@/components/VideoScrubber";
-import VideoScrubberPro from "@/components/VideoScrubberPro";
-import VideoScrubberOptimized from "@/components/VideoScrubberOptimized";
+import VideoScrubberSegments from "@/components/VideoScrubberSegments";
 import { useState } from "react";
 
 export default function Home() {
-  const [mode, setMode] = useState<"scroll" | "mouse" | "both">("both");
-  const [smoothing, setSmoothing] = useState(0.1);
+  const [smoothing, setSmoothing] = useState(0.08);
+  const [baseDuration, setBaseDuration] = useState(800);
+  const [maxDuration, setMaxDuration] = useState(2500);
+  const [useStaging, setUseStaging] = useState(true);
+  const [bufferZone, setBufferZone] = useState(0.05);
 
   return (
-    <main className="relative min-h-[300vh]">
+    <main className="relative min-h-screen">
       {/* Fullscreen video */}
       <div className="fixed inset-0 w-full h-full">
-        <VideoScrubberOptimized
+        <VideoScrubberSegments
           videoSrc="/Comp.mp4"
-          mode={mode}
           smoothing={smoothing}
+          baseDuration={baseDuration}
+          maxDuration={maxDuration}
+          useStaging={useStaging}
+          bufferZone={bufferZone}
         />
       </div>
 
-      {/* Floating controls */}
-      <div className="fixed top-6 left-6 bg-white/10  backdrop-blur-md rounded-lg p-4 z-50 text-white max-w-md">
-        <h1 className="text-xl font-bold mb-3">Video Scrubbing Demo</h1>
+      {/* Optional controls for fine-tuning */}
+      <div className="fixed top-6 right-6 bg-black/30 backdrop-blur-md rounded-lg p-4 z-50 text-white max-w-xs">
+        <h2 className="text-sm font-bold mb-3">Fine-tune Settings</h2>
 
-        <div className="flex gap-2 mb-3">
-          <button
-            onClick={() => setMode("scroll")}
-            className={`px-3 py-1.5 rounded text-sm ${
-              mode === "scroll"
-                ? "bg-blue-500 text-white"
-                : "bg-white/20 hover:bg-white/30"
-            }`}
-          >
-            Scroll
-          </button>
-          <button
-            onClick={() => setMode("mouse")}
-            className={`px-3 py-1.5 rounded text-sm ${
-              mode === "mouse"
-                ? "bg-blue-500 text-white"
-                : "bg-white/20 hover:bg-white/30"
-            }`}
-          >
-            Mouse
-          </button>
-          <button
-            onClick={() => setMode("both")}
-            className={`px-3 py-1.5 rounded text-sm ${
-              mode === "both"
-                ? "bg-blue-500 text-white"
-                : "bg-white/20 hover:bg-white/30"
-            }`}
-          >
-            Both
-          </button>
-        </div>
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <label className="text-xs text-white/60">Smoothing</label>
+            <input
+              type="range"
+              min="0.02"
+              max="0.2"
+              step="0.01"
+              value={smoothing}
+              onChange={(e) => setSmoothing(parseFloat(e.target.value))}
+              className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer"
+            />
+            <div className="text-xs text-white/60 flex justify-between">
+              <span>Smooth</span>
+              <span>Responsive</span>
+            </div>
+          </div>
 
-        <div className="text-xs text-white/80 mb-3">
-          {mode === "scroll" && "Scroll the page to control video"}
-          {mode === "mouse" && "Move mouse horizontally over video"}
-          {mode === "both" && "Scroll or move mouse to control"}
-        </div>
+          <div className="space-y-1">
+            <label className="text-xs text-white/60">Base Duration</label>
+            <input
+              type="range"
+              min="300"
+              max="1500"
+              step="50"
+              value={baseDuration}
+              onChange={(e) => setBaseDuration(parseInt(e.target.value))}
+              className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer"
+            />
+            <div className="text-xs text-white/60 flex justify-between">
+              <span>Fast</span>
+              <span>Slow</span>
+            </div>
+          </div>
 
-        <div className="space-y-1">
-          <label className="text-xs text-white/60">Smoothing</label>
-          <input
-            type="range"
-            min="0.02"
-            max="0.3"
-            step="0.01"
-            value={smoothing}
-            onChange={(e) => setSmoothing(parseFloat(e.target.value))}
-            className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer"
-          />
-          <div className="text-xs text-white/60 flex justify-between">
-            <span>Smooth</span>
-            <span>Responsive</span>
+          <div className="space-y-1">
+            <label className="text-xs text-white/60">Max Duration</label>
+            <input
+              type="range"
+              min="1000"
+              max="4000"
+              step="100"
+              value={maxDuration}
+              onChange={(e) => setMaxDuration(parseInt(e.target.value))}
+              className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer"
+            />
+            <div className="text-xs text-white/60 flex justify-between">
+              <span>Quick</span>
+              <span>Cinematic</span>
+            </div>
+          </div>
+
+          <div className="space-y-2 pt-2 border-t border-white/20">
+            <div className="flex items-center justify-between">
+              <label className="text-xs text-white/60">Staged Transitions</label>
+              <button
+                onClick={() => setUseStaging(!useStaging)}
+                className={`w-10 h-5 rounded-full transition-colors duration-200 ${
+                  useStaging ? 'bg-blue-500' : 'bg-white/20'
+                }`}
+              >
+                <div
+                  className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
+                    useStaging ? 'translate-x-5' : 'translate-x-0.5'
+                  }`}
+                />
+              </button>
+            </div>
+            
+            {useStaging && (
+              <div className="space-y-1">
+                <label className="text-xs text-white/60">Buffer Zone</label>
+                <input
+                  type="range"
+                  min="0.01"
+                  max="0.15"
+                  step="0.01"
+                  value={bufferZone}
+                  onChange={(e) => setBufferZone(parseFloat(e.target.value))}
+                  className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="text-xs text-white/60 flex justify-between">
+                  <span>Tight</span>
+                  <span>Smooth</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
-
-      {/* Spacer for scroll */}
-      <div className="relative z-10 pointer-events-none">
-        <div className="h-screen" />
-        <div className="h-screen" />
-        <div className="h-screen" />
       </div>
     </main>
   );
