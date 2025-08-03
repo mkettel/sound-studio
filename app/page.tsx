@@ -2,6 +2,7 @@
 
 import VideoScrubber from "@/components/VideoScrubber";
 import VideoScrubberPro from "@/components/VideoScrubberPro";
+import VideoScrubberOptimized from "@/components/VideoScrubberOptimized";
 import { useState } from "react";
 
 export default function Home() {
@@ -12,15 +13,15 @@ export default function Home() {
     <main className="relative min-h-[300vh]">
       {/* Fullscreen video */}
       <div className="fixed inset-0 w-full h-full">
-        <VideoScrubber
-          videoSrc="/test-example.mp4"
+        <VideoScrubberOptimized
+          videoSrc="/auw-test.mp4"
           mode={mode}
           smoothing={smoothing}
         />
       </div>
 
       {/* Floating controls */}
-      <div className="fixed top-6 left-6 bg-white/10 border border-gray-100 backdrop-blur-md rounded-lg p-4 z-50 text-white max-w-md">
+      <div className="fixed top-6 left-6 bg-white/10  backdrop-blur-md rounded-lg p-4 z-50 text-white max-w-md">
         <h1 className="text-xl font-bold mb-3">Video Scrubbing Demo</h1>
 
         <div className="flex gap-2 mb-3">
