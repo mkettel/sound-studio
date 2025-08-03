@@ -14,12 +14,12 @@ interface VideoScrubberFramesProps {
   segments?: VideoSegment[];
 }
 
-// Assuming 30fps video, map timestamps to frames
+// Map your sequence positions to frames
 const defaultSegments: VideoSegment[] = [
-  { id: "home", label: "HOME", frame: 0 },           // 0 seconds
-  { id: "left-record", label: "LEFT RECORD", frame: 145 },     // 3 seconds at 30fps
-  { id: "control-panel", label: "CONTROL PANEL", frame: 154 }, // 6 seconds at 30fps  
-  { id: "right-record", label: "RIGHT RECORD", frame: 180 }   // 9 seconds at 30fps
+  { id: "home", label: "HOME", frame: 0 },                    // Wide shot starting position
+  { id: "left-record", label: "LEFT RECORD", frame: 75 },     // Left turntable detail
+  { id: "control-panel", label: "CONTROL PANEL", frame: 154 }, // Center console detail  
+  { id: "right-record", label: "RIGHT RECORD", frame: 225 }   // Right turntable detail
 ];
 
 export default function VideoScrubberFrames({
@@ -62,6 +62,29 @@ export default function VideoScrubberFrames({
     }
   }, []);
 
+  // Get available navigation options based on current position
+  const getAvailableButtons = (currentSegment: string): string[] => {
+    switch(currentSegment) {
+      case "home":
+        // From wide shot, can go to any detail view
+        return ["left-record", "control-panel", "right-record"];
+        
+      case "left-record":
+      case "control-panel": 
+      case "right-record":
+        // From any detail view, can only return home
+        return ["home"];
+        
+      default:
+        return ["home"];
+    }
+  };
+
+  // Get segments available for current position
+  const availableSegments = segments.filter(segment => 
+    getAvailableButtons(activeSegment).includes(segment.id)
+  );
+
   // Navigate to segment with GSAP
   const navigateToSegment = (segment: VideoSegment) => {
     setActiveSegment(segment.id);
@@ -74,7 +97,7 @@ export default function VideoScrubberFrames({
 
     // Calculate smooth duration based on distance
     const distance = Math.abs(segment.frame - frameController.current.frame);
-    const duration = Math.max(0.6, distance / frameCount * 2); // Smooth timing
+    const duration = Math.max(0.6, distance / frameCount * 3.5); // Smooth timing
 
     // Create GSAP timeline (like Apple)
     tlRef.current = gsap.timeline({
@@ -198,7 +221,7 @@ export default function VideoScrubberFrames({
           <div className="bg-gradient-to-t from-black/80 via-black/60 to-transparent h-32 flex items-end">
             <div className="w-full flex justify-center pb-8">
               <div className="flex gap-6">
-                {segments.map((segment) => (
+                {availableSegments.map((segment) => (
                   <button
                     key={segment.id}
                     onClick={() => navigateToSegment(segment)}
@@ -211,6 +234,7 @@ export default function VideoScrubberFrames({
                         ? 'bg-amber-500/30 border-amber-400/80 text-amber-100 shadow-lg shadow-amber-500/20' 
                         : 'bg-stone-800/40 border-stone-400/60 text-stone-200 hover:bg-stone-700/50 hover:border-stone-300'
                       }
+                      ${segment.id === 'home' ? 'bg-blue-600/40 border-blue-400/60 hover:bg-blue-500/50' : ''}
                       rounded-none uppercase
                       hover:shadow-lg hover:shadow-white/10
                       active:scale-95
@@ -222,7 +246,7 @@ export default function VideoScrubberFrames({
                       letterSpacing: '0.15em'
                     }}
                   >
-                    {segment.label}
+                    {segment.id === 'home' && activeSegment !== 'home' ? '← BACK TO HOME' : segment.label}
                     
                     {/* LED indicator */}
                     {activeSegment === segment.id && (
