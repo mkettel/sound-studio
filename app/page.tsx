@@ -14,7 +14,7 @@ export default function Home() {
       {/* Fullscreen video */}
       <div className="fixed inset-0 w-full h-full">
         <VideoScrubberOptimized
-          videoSrc="/auw-test.mp4"
+          videoSrc="/Comp.mp4"
           mode={mode}
           smoothing={smoothing}
         />
