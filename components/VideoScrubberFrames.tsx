@@ -227,15 +227,15 @@ export default function VideoScrubberFrames({
                     onClick={() => navigateToSegment(segment)}
                     disabled={isTransitioning}
                     className={`
-                      relative px-6 py-3 text-xs font-bold tracking-widest
+                      relative px-6 py-3 text-md font-bold tracking-widest
                       transition-all duration-200 ease-out
-                      border backdrop-blur-sm
+                      border backdrop-blur-sm rounded-md
                       ${activeSegment === segment.id 
                         ? 'bg-amber-500/30 border-amber-400/80 text-amber-100 shadow-lg shadow-amber-500/20' 
                         : 'bg-stone-800/40 border-stone-400/60 text-stone-200 hover:bg-stone-700/50 hover:border-stone-300'
                       }
                       ${segment.id === 'home' ? 'bg-blue-600/40 border-blue-400/60 hover:bg-blue-500/50' : ''}
-                      rounded-none uppercase
+                      uppercase
                       hover:shadow-lg hover:shadow-white/10
                       active:scale-95
                       disabled:opacity-70
