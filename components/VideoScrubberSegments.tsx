@@ -21,21 +21,27 @@ interface VideoScrubberSegmentsProps {
 
 const defaultSegments: VideoSegment[] = [
   {
+    id: "home",
+    label: "HOME",
+    timestamp: 0,
+    description: "Full scene view"
+  },
+  {
     id: "left-record",
     label: "LEFT RECORD",
-    timestamp: 3,
+    timestamp: 1,
     description: "Left turntable view"
   },
   {
     id: "control-panel", 
     label: "CONTROL PANEL",
-    timestamp: 5,
+    timestamp: 2,
     description: "Central mixing console"
   },
   {
     id: "right-record",
     label: "RIGHT RECORD", 
-    timestamp: 7,
+    timestamp: 3,
     description: "Right turntable view"
   }
 ];
@@ -43,10 +49,10 @@ const defaultSegments: VideoSegment[] = [
 export default function VideoScrubberSegments({
   videoSrc,
   segments = defaultSegments,
-  smoothing = 0.08,
-  baseDuration = 800,
-  maxDuration = 2500,
-  useStaging = true,
+  smoothing = 0.1,
+  baseDuration = 600,
+  maxDuration = 1200,
+  useStaging = false,
   bufferZone = 0.05,
 }: VideoScrubberSegmentsProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -273,54 +279,25 @@ export default function VideoScrubberSegments({
 
   const navigateToSegment = useCallback((segment: VideoSegment) => {
     // Convert timestamp to normalized position
-    const rawTarget = timestampToPosition(segment.timestamp);
+    const target = timestampToPosition(segment.timestamp);
     const currentPos = currentTime.current;
     
-    // Snap target to keyframe for smoother seeking
-    const keyframeTarget = snapToKeyframe(rawTarget);
+    // Simple, direct animation - no staging complexity
+    isStaging.current = false;
+    targetTime.current = target;
     
-    // Determine if we should use staging
-    const distance = Math.abs(keyframeTarget - currentPos);
-    const shouldUseStaging = useStaging && distance > bufferZone * 2;
-    
-    if (shouldUseStaging) {
-      // Two-phase animation: staging then final
-      const stagingPos = getStagingPosition(keyframeTarget, currentPos);
-      
-      isStaging.current = true;
-      stagePhase.current = 'staging';
-      finalTarget.current = keyframeTarget;
-      
-      // First phase: move to staging position
-      targetTime.current = stagingPos;
-      animationDuration.current = calculateOptimalDuration(currentPos, stagingPos);
-    } else {
-      // Single-phase animation directly to target
-      isStaging.current = false;
-      targetTime.current = keyframeTarget;
-      animationDuration.current = calculateOptimalDuration(currentPos, keyframeTarget);
-    }
+    // Use simple duration based on distance
+    const distance = Math.abs(target - currentPos);
+    animationDuration.current = Math.max(baseDuration, distance * 800);
     
     // Handle interruption smoothly
     if (isEasing.current) {
-      // Get current velocity to maintain momentum
-      const velocity = getCurrentVelocity();
-      
-      // Use current position as new start, maintaining some velocity
       animationStartValue.current = currentPos;
-      
-      // Adjust duration based on current velocity
-      const velocityFactor = Math.abs(velocity) * 0.3;
-      animationDuration.current = Math.max(
-        animationDuration.current * (1 - velocityFactor),
-        300 // Minimum duration for smooth feel
-      );
     } else {
-      // Starting fresh animation
       animationStartValue.current = currentPos;
     }
     
-    // Set up new animation
+    // Set up animation
     animationStartTime.current = Date.now();
     isEasing.current = true;
     setActiveSegment(segment.id);
@@ -329,7 +306,7 @@ export default function VideoScrubberSegments({
     lastUpdateTime.current = Date.now();
     
     startAnimation();
-  }, [startAnimation, useStaging, bufferZone]);
+  }, [startAnimation, baseDuration]);
 
   // Preload key frames for instant seeking
   const preloadKeyFrames = useCallback(async () => {
@@ -344,6 +321,9 @@ export default function VideoScrubberSegments({
     canvas.width = 320; // Smaller resolution for caching
     canvas.height = 180;
 
+    // Store original position
+    const originalTime = video.currentTime;
+    
     // Preload frames at each segment timestamp
     for (const segment of segments) {
       try {
@@ -361,6 +341,12 @@ export default function VideoScrubberSegments({
         console.warn('Failed to preload frame for segment:', segment.id);
       }
     }
+    
+    // Return to original position (should be 0 seconds)
+    video.currentTime = originalTime;
+    await new Promise(resolve => {
+      video.addEventListener('seeked', resolve, { once: true });
+    });
   }, [segments]);
 
   useEffect(() => {
@@ -374,16 +360,16 @@ export default function VideoScrubberSegments({
       video.controls = false;
       video.playbackRate = 0;
 
-      // Start at 0 seconds with no button selected
+      // Start at 0 seconds with HOME button selected
       currentTime.current = 0;
       targetTime.current = 0;
       video.currentTime = 0;
-      setActiveSegment(null); // No button selected initially
+      setActiveSegment("home"); // Start with HOME selected
 
-      // Preload key frames after a short delay
-      setTimeout(() => {
-        preloadKeyFrames();
-      }, 1000);
+      // Preload key frames after a short delay (disabled for now to prevent position jumping)
+      // setTimeout(() => {
+      //   preloadKeyFrames();
+      // }, 1000);
 
       // Request video frame callback for smoother updates
       if ("requestVideoFrameCallback" in video) {
@@ -455,114 +441,43 @@ export default function VideoScrubberSegments({
               {/* Background bar for buttons */}
               <div className="bg-gradient-to-t from-black/80 via-black/60 to-transparent h-32 flex items-end">
                 <div className="w-full flex justify-center pb-8">
-                  <div className="flex gap-8">
-                    {/* Left Record Button */}
-                    <div className="flex flex-col items-center">
-                      <button
-                        onClick={() => navigateToSegment(segments[0])}
-                        disabled={isTransitioning && activeSegment === segments[0].id}
-                        className={`
-                          relative px-8 py-4 text-xs font-bold tracking-widest
-                          transition-all duration-300 ease-out
-                          border backdrop-blur-sm
-                          ${activeSegment === segments[0].id 
-                            ? 'bg-amber-500/30 border-amber-400/80 text-amber-100 shadow-lg shadow-amber-500/20' 
-                            : 'bg-stone-800/40 border-stone-400/60 text-stone-200 hover:bg-stone-700/50 hover:border-stone-300'
-                          }
-                          ${isTransitioning && activeSegment === segments[0].id ? 'cursor-wait' : 'cursor-pointer'}
-                          rounded-none uppercase
-                          hover:shadow-lg hover:shadow-white/10
-                          active:scale-95
-                          disabled:opacity-90
-                        `}
-                        style={{
-                          textShadow: '0 1px 3px rgba(0,0,0,0.8)',
-                          fontFamily: 'monospace',
-                          letterSpacing: '0.2em'
-                        }}
-                      >
-                        <div className="relative z-10">
-                          LEFT RECORD
-                        </div>
-                        
-                        {/* LED-style indicator */}
-                        {activeSegment === segments[0].id && (
-                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse shadow-lg shadow-amber-400/50" />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Control Panel Button */}
-                    <div className="flex flex-col items-center">
-                      <button
-                        onClick={() => navigateToSegment(segments[1])}
-                        disabled={isTransitioning && activeSegment === segments[1].id}
-                        className={`
-                          relative px-8 py-4 text-xs font-bold tracking-widest
-                          transition-all duration-300 ease-out
-                          border backdrop-blur-sm
-                          ${activeSegment === segments[1].id 
-                            ? 'bg-amber-500/30 border-amber-400/80 text-amber-100 shadow-lg shadow-amber-500/20' 
-                            : 'bg-stone-800/40 border-stone-400/60 text-stone-200 hover:bg-stone-700/50 hover:border-stone-300'
-                          }
-                          ${isTransitioning && activeSegment === segments[1].id ? 'cursor-wait' : 'cursor-pointer'}
-                          rounded-none uppercase
-                          hover:shadow-lg hover:shadow-white/10
-                          active:scale-95
-                          disabled:opacity-90
-                        `}
-                        style={{
-                          textShadow: '0 1px 3px rgba(0,0,0,0.8)',
-                          fontFamily: 'monospace',
-                          letterSpacing: '0.2em'
-                        }}
-                      >
-                        <div className="relative z-10">
-                          CONTROL PANEL
-                        </div>
-                        
-                        {/* LED-style indicator */}
-                        {activeSegment === segments[1].id && (
-                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse shadow-lg shadow-amber-400/50" />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Right Record Button */}
-                    <div className="flex flex-col items-center">
-                      <button
-                        onClick={() => navigateToSegment(segments[2])}
-                        disabled={isTransitioning && activeSegment === segments[2].id}
-                        className={`
-                          relative px-8 py-4 text-xs font-bold tracking-widest
-                          transition-all duration-300 ease-out
-                          border backdrop-blur-sm
-                          ${activeSegment === segments[2].id 
-                            ? 'bg-amber-500/30 border-amber-400/80 text-amber-100 shadow-lg shadow-amber-500/20' 
-                            : 'bg-stone-800/40 border-stone-400/60 text-stone-200 hover:bg-stone-700/50 hover:border-stone-300'
-                          }
-                          ${isTransitioning && activeSegment === segments[2].id ? 'cursor-wait' : 'cursor-pointer'}
-                          rounded-none uppercase
-                          hover:shadow-lg hover:shadow-white/10
-                          active:scale-95
-                          disabled:opacity-90
-                        `}
-                        style={{
-                          textShadow: '0 1px 3px rgba(0,0,0,0.8)',
-                          fontFamily: 'monospace',
-                          letterSpacing: '0.2em'
-                        }}
-                      >
-                        <div className="relative z-10">
-                          RIGHT RECORD
-                        </div>
-                        
-                        {/* LED-style indicator */}
-                        {activeSegment === segments[2].id && (
-                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse shadow-lg shadow-amber-400/50" />
-                        )}
-                      </button>
-                    </div>
+                  <div className="flex gap-6">
+                    {segments.map((segment) => (
+                      <div key={segment.id} className="flex flex-col items-center">
+                        <button
+                          onClick={() => navigateToSegment(segment)}
+                          disabled={isTransitioning && activeSegment === segment.id}
+                          className={`
+                            relative px-6 py-3 text-xs font-bold tracking-widest
+                            transition-all duration-300 ease-out
+                            border backdrop-blur-sm
+                            ${activeSegment === segment.id 
+                              ? 'bg-amber-500/30 border-amber-400/80 text-amber-100 shadow-lg shadow-amber-500/20' 
+                              : 'bg-stone-800/40 border-stone-400/60 text-stone-200 hover:bg-stone-700/50 hover:border-stone-300'
+                            }
+                            ${isTransitioning && activeSegment === segment.id ? 'cursor-wait' : 'cursor-pointer'}
+                            rounded-none uppercase
+                            hover:shadow-lg hover:shadow-white/10
+                            active:scale-95
+                            disabled:opacity-90
+                          `}
+                          style={{
+                            textShadow: '0 1px 3px rgba(0,0,0,0.8)',
+                            fontFamily: 'monospace',
+                            letterSpacing: '0.15em'
+                          }}
+                        >
+                          <div className="relative z-10">
+                            {segment.label}
+                          </div>
+                          
+                          {/* LED-style indicator */}
+                          {activeSegment === segment.id && (
+                            <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse shadow-lg shadow-amber-400/50" />
+                          )}
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
