@@ -68,7 +68,7 @@ function Deck({ side, djState, songs, onSongSelect, onTogglePlayback, onVolumeCh
                   onClick={() => onSongSelect(song)}
                   className={`w-full p-2 text-xs rounded transition-all font-mono relative ${
                     isCurrentSong
-                      ? `${isLeft ? 'bg-blue-500/20 border-blue-400/40' : 'bg-red-500/20 border-red-400/40'} text-white border`
+                      ? `${isLeft ? 'bg-blue-500/20 border-blue-400/40' : 'bg-blue-500/20 border-blue-400/40'} text-white border`
                       : isQueuedSong
                       ? 'bg-yellow-500/20 border border-yellow-400/40 text-yellow-200'
                       : 'bg-black/20 border border-gray-300/10 text-gray-200/80 hover:bg-gray-300/10'
@@ -201,7 +201,7 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
   return (
     <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 z-40 transition-all duration-300">
       <div className={`bg-gradient-to-b from-gray-100/10 to-gray-200/5 backdrop-blur-md rounded-lg border border-gray-300/20 shadow-2xl transition-all duration-300 ${
-        isExpanded ? 'px-12 py-2' : 'px-8 py-2'
+        isExpanded ? 'px-6 py-2' : 'px-8 py-2'
       }`} style={{ minWidth: '75vw' }}>
         
         {/* Control Panel Header */}
@@ -225,7 +225,7 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
         <div className={`transition-all duration-300 overflow-hidden ${
           isExpanded ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'
         }`}>
-          <div className="flex items-center justify-between space-x-12">
+          <div className="flex items-center justify-between space-x-6">
             
             {/* Left Side - Crossfader */}
             <div className="flex items-center space-x-6">
@@ -249,12 +249,12 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
             </div>
 
             {/* Center - Audio Visualizer */}
-            <div className="flex items-center flex-1 justify-center">
+            <div className="flex items-center rounded-lg overflow-hidden flex-1 justify-center">
               <AudioVisualizer 
                 getFrequencyData={getFrequencyData} 
-                width={isMobile ? 100 : 400} 
+                width={isMobile ? 200 : 500} 
                 height={70} 
-                barCount={25}
+                barCount={isMobile ? 25 : 50}
               />
             </div>
 
@@ -305,7 +305,7 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
             <div className="flex-1 flex justify-center">
               <AudioVisualizer 
                 getFrequencyData={getFrequencyData} 
-                width={isMobile ? 100 : 400} 
+                width={isMobile ? 100 : 500} 
                 height={isMobile ? 50 : 100} 
                 barCount={20}
               />

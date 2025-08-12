@@ -12,9 +12,9 @@ interface AudioVisualizerProps {
 
 export default function AudioVisualizer({ 
   getFrequencyData, 
-  width = 320, 
+  width = 120, 
   height = 120, 
-  barCount = 32,
+  barCount = 64,
   className = ""
 }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
