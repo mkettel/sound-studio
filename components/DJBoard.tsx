@@ -57,7 +57,7 @@ function Deck({ side, djState, songs, onSongSelect, onTogglePlayback, onVolumeCh
           isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}>
           {/* Song Selection */}
-          <div className="space-y-2 mb-4">
+          <div className="space-y-1 mb-4">
             {songs.map((song) => {
               const isCurrentSong = deckState.currentSong?.id === song.id;
               const isQueuedSong = deckState.queuedSong?.id === song.id;
