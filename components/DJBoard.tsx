@@ -57,7 +57,7 @@ function Deck({ side, djState, songs, onSongSelect, onTogglePlayback, onVolumeCh
           isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}>
           {/* Song Selection */}
-          <div className="space-y-1 mb-4">
+          <div className="space-y-1 bg-black/10 rounded-md p-2 mb-4">
             {songs.map((song) => {
               const isCurrentSong = deckState.currentSong?.id === song.id;
               const isQueuedSong = deckState.queuedSong?.id === song.id;
@@ -66,18 +66,18 @@ function Deck({ side, djState, songs, onSongSelect, onTogglePlayback, onVolumeCh
                 <button
                   key={song.id}
                   onClick={() => onSongSelect(song)}
-                  className={`w-full p-2 text-xs rounded transition-all font-mono relative ${
+                  className={`w-full text-left p-1 text-xs rounded transition-all font-mono relative ${
                     isCurrentSong
-                      ? `${isLeft ? 'bg-blue-500/20 border-blue-400/40' : 'bg-blue-500/20 border-blue-400/40'} text-white border`
+                      ? `${isLeft ? 'underline' : 'underline'} text-white `
                       : isQueuedSong
                       ? 'bg-yellow-500/20 border border-yellow-400/40 text-yellow-200'
-                      : 'bg-black/20 border border-gray-300/10 text-gray-200/80 hover:bg-gray-300/10'
+                      : 'bg-black/0  border-gray-300/10 text-gray-200/80 hover:underline'
                   }`}
                   disabled={deckState.isLoading || deckState.isQueueLoading}
                 >
                   <div className="truncate">{song.title}</div>
                   {isQueuedSong && (
-                    <div className="absolute top-0 right-0 text-yellow-400 text-xs">Q</div>
+                    <div className="absolute top-1 right-1 text-yellow-400 text-xs">Q</div>
                   )}
                 </button>
               );
