@@ -2,6 +2,8 @@
 
 import { useDJEngine, Song } from '@/hooks/useDJEngine';
 import { useState } from 'react';
+import AudioVisualizer from './AudioVisualizer';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 // Deck Component
 interface DeckProps {
@@ -17,6 +19,8 @@ function Deck({ side, djState, songs, onSongSelect, onTogglePlayback, onVolumeCh
   const deckState = side === 'left' ? djState.leftDeck : djState.rightDeck;
   const isLeft = side === 'left';
   const [isExpanded, setIsExpanded] = useState(true);
+
+  const isMobile = useIsMobile();
 
   return (
     <div className={`fixed top-4 ${isLeft ? 'left-4' : 'right-4'} z-40 transition-all duration-300`}>
@@ -188,16 +192,17 @@ interface CrossfaderProps {
   onChange: (value: number) => void;
   masterVolume: number;
   onMasterVolumeChange: (volume: number) => void;
+  getFrequencyData: () => Uint8Array;
 }
 
-function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange }: CrossfaderProps) {
+function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFrequencyData }: CrossfaderProps) {
   const [isExpanded, setIsExpanded] = useState(true);
-
+  const isMobile = useIsMobile();
   return (
-    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-40 transition-all duration-300 min-w-64">
+    <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 z-40 transition-all duration-300">
       <div className={`bg-gradient-to-b from-gray-100/10 to-gray-200/5 backdrop-blur-md rounded-lg border border-gray-300/20 shadow-2xl transition-all duration-300 ${
-        isExpanded ? 'px-6 py-4' : 'px-3 py-2'
-      }`}>
+        isExpanded ? 'px-12 py-2' : 'px-8 py-2'
+      }`} style={{ minWidth: '75vw' }}>
         
         {/* Control Panel Header */}
         <div className="flex items-center justify-between mb-2">
@@ -216,15 +221,74 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange }: Cro
           </button>
         </div>
 
-        {/* Expanded Content */}
+        {/* Expanded Content - Horizontal Layout */}
         <div className={`transition-all duration-300 overflow-hidden ${
-          isExpanded ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0'
+          isExpanded ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'
         }`}>
-          {/* Crossfader */}
-          <div className="flex items-center justify-center space-x-4 mb-4">
-            <div className="text-gray-300/60 text-xs font-mono">L</div>
-            <div className="flex flex-col items-center">
-              <div className="text-gray-300/60 text-xs font-mono mb-1">CROSSFADER</div>
+          <div className="flex items-center justify-between space-x-12">
+            
+            {/* Left Side - Crossfader */}
+            <div className="flex items-center space-x-6">
+              <div className="text-white text-xs font-mono">L</div>
+              <div className="flex flex-col items-center">
+                <div className="text-white text-xs font-mono mb-2">CROSSFADER</div>
+                <input
+                  type="range"
+                  min="-1"
+                  max="1"
+                  step="0.01"
+                  value={value}
+                  onChange={(e) => onChange(parseFloat(e.target.value))}
+                  className="w-56 h-2 bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="text-white text-xs font-mono mt-2">
+                  {value < -0.1 ? 'LEFT' : value > 0.1 ? 'RIGHT' : 'CENTER'}
+                </div>
+              </div>
+              <div className="text-white text-xs font-mono">R</div>
+            </div>
+
+            {/* Center - Audio Visualizer */}
+            <div className="flex items-center flex-1 justify-center">
+              <AudioVisualizer 
+                getFrequencyData={getFrequencyData} 
+                width={isMobile ? 100 : 400} 
+                height={70} 
+                barCount={25}
+              />
+            </div>
+
+            {/* Right Side - Master Volume */}
+            <div className="flex items-center space-x-3">
+              <div className="text-white text-xs font-mono">MASTER</div>
+              <div className="flex flex-col items-center">
+                <div className="text-white text-xs font-mono mb-2">VOLUME</div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={masterVolume}
+                  onChange={(e) => onMasterVolumeChange(parseFloat(e.target.value))}
+                  className="w-24 h-2 bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="text-white text-xs font-mono mt-2">
+                  {Math.round(masterVolume * 100)}%
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Collapsed Content - Mini Controls with Visualizer */}
+        <div className={`transition-all duration-300 ${
+          isExpanded ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-16 opacity-100'
+        }`}>
+          <div className="flex items-center justify-between space-x-8">
+            {/* Mini Crossfader */}
+            <div className="flex items-center space-x-3">
+              <div className="text-white text-xs font-mono">L</div>
               <input
                 type="range"
                 min="-1"
@@ -232,51 +296,36 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange }: Cro
                 step="0.01"
                 value={value}
                 onChange={(e) => onChange(parseFloat(e.target.value))}
-                className="w-32 h-2 bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
+                className="w-32 h-1 bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
               />
-              <div className="text-gray-300/60 text-xs font-mono mt-1">
-                {value < -0.1 ? 'LEFT' : value > 0.1 ? 'RIGHT' : 'CENTER'}
+              <div className="text-white text-xs font-mono">R</div>
+            </div>
+
+            {/* Mini Visualizer - Center */}
+            <div className="flex-1 flex justify-center">
+              <AudioVisualizer 
+                getFrequencyData={getFrequencyData} 
+                width={isMobile ? 100 : 400} 
+                height={isMobile ? 50 : 100} 
+                barCount={20}
+              />
+            </div>
+
+            {/* Mini Master Volume */}
+            <div className="flex items-center space-x-3">
+              <div className="text-white text-xs font-mono">M</div>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={masterVolume}
+                onChange={(e) => onMasterVolumeChange(parseFloat(e.target.value))}
+                className="w-20 h-1 bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
+              />
+              <div className="text-white text-xs font-mono">
+                {Math.round(masterVolume * 100)}
               </div>
-            </div>
-            <div className="text-gray-300/60 text-xs font-mono">R</div>
-          </div>
-
-          {/* Master Volume */}
-          <div className="flex items-center justify-center space-x-3 pt-3 border-t border-gray-300/10">
-            <div className="text-gray-300/60 text-xs font-mono">MASTER</div>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={masterVolume}
-              onChange={(e) => onMasterVolumeChange(parseFloat(e.target.value))}
-              className="w-24 h-2 bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
-            />
-            <div className="text-gray-300/60 text-xs font-mono">
-              {Math.round(masterVolume * 100)}
-            </div>
-          </div>
-        </div>
-
-        {/* Collapsed Content - Mini Crossfader */}
-        <div className={`transition-all duration-300 ${
-          isExpanded ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-16 opacity-100'
-        }`}>
-          <div className="flex items-center space-x-2">
-            <div className="text-gray-300/60 text-xs font-mono">L</div>
-            <input
-              type="range"
-              min="-1"
-              max="1"
-              step="0.01"
-              value={value}
-              onChange={(e) => onChange(parseFloat(e.target.value))}
-              className="w-16 h-1 bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
-            />
-            <div className="text-gray-300/60 text-xs font-mono">R</div>
-            <div className="text-gray-300/60 text-xs font-mono ml-2">
-              M:{Math.round(masterVolume * 100)}
             </div>
           </div>
         </div>
@@ -293,6 +342,7 @@ export default function DJBoard() {
     setCrossfader,
     setDeckVolume,
     setMasterVolume,
+    getFrequencyData,
   } = useDJEngine();
 
   // Left Deck Songs - Hip Hop & Electronic
@@ -367,6 +417,7 @@ export default function DJBoard() {
         onChange={setCrossfader}
         masterVolume={djState.masterVolume}
         onMasterVolumeChange={setMasterVolume}
+        getFrequencyData={getFrequencyData}
       />
     </>
   );

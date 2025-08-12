@@ -37,6 +37,7 @@ export const useDJEngine = () => {
   const rightDeckGainRef = useRef<GainNode | null>(null);
   const leftCrossfaderGainRef = useRef<GainNode | null>(null);
   const rightCrossfaderGainRef = useRef<GainNode | null>(null);
+  const masterAnalyserRef = useRef<AnalyserNode | null>(null);
   
   // Audio sources for each deck
   const leftSourceRef = useRef<AudioBufferSourceNode | null>(null);
@@ -81,8 +82,17 @@ export const useDJEngine = () => {
 
       // Create master gain (final output)
       const masterGain = audioContext.createGain();
-      masterGain.connect(audioContext.destination);
       masterGainRef.current = masterGain;
+
+      // Create analyser for visualization
+      const masterAnalyser = audioContext.createAnalyser();
+      masterAnalyser.fftSize = 256;
+      masterAnalyser.smoothingTimeConstant = 0.8;
+      masterAnalyserRef.current = masterAnalyser;
+
+      // Connect: masterGain -> masterAnalyser -> destination
+      masterGain.connect(masterAnalyser);
+      masterAnalyser.connect(audioContext.destination);
 
       // Create deck volume controls
       const leftDeckGain = audioContext.createGain();
@@ -393,6 +403,16 @@ export const useDJEngine = () => {
     setDJState(prev => ({ ...prev, masterVolume: clampedVolume }));
   }, []);
 
+  // Get frequency data for visualization
+  const getFrequencyData = useCallback(() => {
+    if (!masterAnalyserRef.current) return new Uint8Array(0);
+    
+    const bufferLength = masterAnalyserRef.current.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    masterAnalyserRef.current.getByteFrequencyData(dataArray);
+    return dataArray;
+  }, []);
+
   // Initialize on mount
   useEffect(() => {
     const handleUserInteraction = () => {
@@ -421,6 +441,7 @@ export const useDJEngine = () => {
     setCrossfader,
     setDeckVolume,
     setMasterVolume,
+    getFrequencyData,
     initializeAudioContext,
   };
 };

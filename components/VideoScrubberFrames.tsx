@@ -218,9 +218,9 @@ export default function VideoScrubberFrames({
       {/* Navigation Buttons */}
       {isLoaded && (
         <div className="absolute bottom-0 left-0 right-0 z-10">
-          <div className="bg-gradient-to-t from-black/80 via-black/60 to-transparent h-32 flex items-end">
-            <div className="w-full hidden justify-center pb-8">
-              <div className="flex gap-6">
+          <div className="bg-gradient-to-t hidden from-black/80 via-black/60 to-transparent h-0 flex items-end">
+            <div className="w-full flex justify-start pb-8">
+              <div className="flex gap-2">
                 {availableSegments.map((segment) => (
                   <button
                     key={segment.id}
