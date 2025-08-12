@@ -205,7 +205,7 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
       }`} style={{ minWidth: '75vw' }}>
         
         {/* Control Panel Header */}
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center hidden justify-between mb-2">
           <div className={`text-gray-200 font-mono text-xs uppercase tracking-wider transition-opacity duration-300 ${
             isExpanded ? 'opacity-100' : 'opacity-0'
           }`}>
@@ -249,7 +249,7 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
             </div>
 
             {/* Center - Audio Visualizer */}
-            <div className="flex items-center rounded-lg overflow-hidden flex-1 justify-center">
+            <div className="flex items-center bg-white/10 rounded-lg overflow-hidden flex-1 justify-center">
               <AudioVisualizer 
                 getFrequencyData={getFrequencyData} 
                 width={isMobile ? 200 : 500} 
