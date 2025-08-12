@@ -11,10 +11,12 @@ export interface Song {
 
 export interface DeckState {
   currentSong: Song | null;
+  queuedSong: Song | null;
   isPlaying: boolean;
   volume: number;
   position: number;
   isLoading: boolean;
+  isQueueLoading: boolean;
 }
 
 export interface DJEngineState {
@@ -50,17 +52,21 @@ export const useDJEngine = () => {
   const [djState, setDJState] = useState<DJEngineState>({
     leftDeck: {
       currentSong: null,
+      queuedSong: null,
       isPlaying: false,
       volume: 0.8,
       position: 0,
       isLoading: false,
+      isQueueLoading: false,
     },
     rightDeck: {
       currentSong: null,
+      queuedSong: null,
       isPlaying: false,
       volume: 0.8,
       position: 0,
       isLoading: false,
+      isQueueLoading: false,
     },
     crossfaderValue: 0, // Center position
     masterVolume: 0.7,
@@ -127,51 +133,106 @@ export const useDJEngine = () => {
     rightCrossfaderGainRef.current.gain.value = rightGain;
   }, []);
 
-  // Load and decode audio file
+  // Load and decode audio file (queue if deck is playing)
   const loadSong = useCallback(async (song: Song, deck: DeckSide): Promise<void> => {
     if (!audioContextRef.current) {
       await initializeAudioContext();
     }
 
-    setDJState(prev => ({
-      ...prev,
-      [deck + 'Deck']: { 
-        ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
-        isLoading: true 
-      }
-    }));
-
-    try {
-      const response = await fetch(song.url);
-      const arrayBuffer = await response.arrayBuffer();
-      const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
-      
-      const songWithBuffer = { ...song, buffer: audioBuffer, duration: audioBuffer.duration };
-
+    const deckState = deck === 'left' ? djState.leftDeck : djState.rightDeck;
+    
+    // If clicking the same queued song, dequeue it
+    if (deckState.queuedSong?.id === song.id) {
       setDJState(prev => ({
         ...prev,
         [deck + 'Deck']: {
           ...(deck === 'left' ? prev.leftDeck : prev.rightDeck),
-          currentSong: songWithBuffer,
-          isLoading: false,
-          position: 0,
+          queuedSong: null,
         }
       }));
-
-      console.log(`Loaded song "${song.title}" on ${deck} deck`);
-    } catch (error) {
-      console.error(`Failed to load song "${song.title}":`, error);
+      console.log(`Dequeued song "${song.title}" from ${deck} deck`);
+      return;
+    }
+    
+    // If deck is currently playing, queue the song instead
+    if (deckState.isPlaying && deckState.currentSong) {
       setDJState(prev => ({
         ...prev,
         [deck + 'Deck']: { 
           ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
-          isLoading: false 
+          isQueueLoading: true 
         }
       }));
-    }
-  }, [initializeAudioContext]);
 
-  // Play/pause deck
+      try {
+        const response = await fetch(song.url);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
+        
+        const songWithBuffer = { ...song, buffer: audioBuffer, duration: audioBuffer.duration };
+
+        setDJState(prev => ({
+          ...prev,
+          [deck + 'Deck']: {
+            ...(deck === 'left' ? prev.leftDeck : prev.rightDeck),
+            queuedSong: songWithBuffer,
+            isQueueLoading: false,
+          }
+        }));
+
+        console.log(`Queued song "${song.title}" on ${deck} deck`);
+      } catch (error) {
+        console.error(`Failed to queue song "${song.title}":`, error);
+        setDJState(prev => ({
+          ...prev,
+          [deck + 'Deck']: { 
+            ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
+            isQueueLoading: false 
+          }
+        }));
+      }
+    } else {
+      // Load directly if deck is not playing
+      setDJState(prev => ({
+        ...prev,
+        [deck + 'Deck']: { 
+          ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
+          isLoading: true 
+        }
+      }));
+
+      try {
+        const response = await fetch(song.url);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
+        
+        const songWithBuffer = { ...song, buffer: audioBuffer, duration: audioBuffer.duration };
+
+        setDJState(prev => ({
+          ...prev,
+          [deck + 'Deck']: {
+            ...(deck === 'left' ? prev.leftDeck : prev.rightDeck),
+            currentSong: songWithBuffer,
+            isLoading: false,
+            position: 0,
+          }
+        }));
+
+        console.log(`Loaded song "${song.title}" on ${deck} deck`);
+      } catch (error) {
+        console.error(`Failed to load song "${song.title}":`, error);
+        setDJState(prev => ({
+          ...prev,
+          [deck + 'Deck']: { 
+            ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
+            isLoading: false 
+          }
+        }));
+      }
+    }
+  }, [initializeAudioContext, djState.leftDeck, djState.rightDeck]);
+
+  // Play/pause deck (handle queue transitions)
   const togglePlayback = useCallback(async (deck: DeckSide) => {
     if (!audioContextRef.current) {
       await initializeAudioContext();
@@ -183,21 +244,90 @@ export const useDJEngine = () => {
     const startTimeRef = deck === 'left' ? leftStartTimeRef : rightStartTimeRef;
     const offsetRef = deck === 'left' ? leftOffsetRef : rightOffsetRef;
 
-    if (!deckState.currentSong?.buffer || !gainNode) return;
+    if (!gainNode) return;
 
     if (deckState.isPlaying) {
-      // Pause
-      if (sourceRef.current) {
-        sourceRef.current.stop();
-        sourceRef.current = null;
+      // If there's a queued song, transition to it
+      if (deckState.queuedSong?.buffer) {
+        // Stop current song
+        if (sourceRef.current) {
+          sourceRef.current.stop();
+          sourceRef.current = null;
+        }
+
+        // Reset offset for new song
+        offsetRef.current = 0;
+
+        // Start queued song
+        const source = audioContextRef.current!.createBufferSource();
+        source.buffer = deckState.queuedSong.buffer;
+        source.connect(gainNode);
         
-        // Calculate offset for resume
-        offsetRef.current += audioContextRef.current!.currentTime - startTimeRef.current;
+        startTimeRef.current = audioContextRef.current!.currentTime;
+        source.start(0, 0);
+        sourceRef.current = source;
+
+        // Handle song end
+        source.onended = () => {
+          if (sourceRef.current === source) {
+            setDJState(prev => ({
+              ...prev,
+              [deck + 'Deck']: { 
+                ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
+                isPlaying: false 
+              }
+            }));
+            sourceRef.current = null;
+            offsetRef.current = 0;
+          }
+        };
+
+        // Update state: move queued song to current
+        setDJState(prev => ({
+          ...prev,
+          [deck + 'Deck']: { 
+            ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
+            currentSong: deckState.queuedSong,
+            queuedSong: null,
+            isPlaying: true,
+            position: 0,
+          }
+        }));
+
+        console.log(`Transitioned to queued song on ${deck} deck`);
+        return;
+      } else {
+        // Normal pause
+        if (sourceRef.current) {
+          sourceRef.current.stop();
+          sourceRef.current = null;
+          
+          // Calculate offset for resume
+          offsetRef.current += audioContextRef.current!.currentTime - startTimeRef.current;
+        }
       }
     } else {
-      // Play
+      // Play current or queued song
+      const songToPlay = deckState.queuedSong || deckState.currentSong;
+      if (!songToPlay?.buffer) return;
+
+      // If playing queued song, make it current
+      if (deckState.queuedSong) {
+        setDJState(prev => ({
+          ...prev,
+          [deck + 'Deck']: { 
+            ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
+            currentSong: deckState.queuedSong,
+            queuedSong: null,
+            position: 0,
+          }
+        }));
+        offsetRef.current = 0;
+      }
+
+      // Start playback
       const source = audioContextRef.current!.createBufferSource();
-      source.buffer = deckState.currentSong.buffer;
+      source.buffer = songToPlay.buffer;
       source.connect(gainNode);
       
       startTimeRef.current = audioContextRef.current!.currentTime;

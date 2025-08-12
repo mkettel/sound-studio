@@ -54,20 +54,30 @@ function Deck({ side, djState, songs, onSongSelect, onTogglePlayback, onVolumeCh
         }`}>
           {/* Song Selection */}
           <div className="space-y-2 mb-4">
-            {songs.map((song) => (
-              <button
-                key={song.id}
-                onClick={() => onSongSelect(song)}
-                className={`w-full p-2 text-xs rounded transition-all font-mono ${
-                  deckState.currentSong?.id === song.id
-                    ? `${isLeft ? 'bg-blue-500/20 border-blue-400/40' : 'bg-red-500/20 border-red-400/40'} text-white border`
-                    : 'bg-black/20 border border-gray-300/10 text-gray-200/80 hover:bg-gray-300/10'
-                }`}
-                disabled={deckState.isLoading}
-              >
-                <div className="truncate">{song.title}</div>
-              </button>
-            ))}
+            {songs.map((song) => {
+              const isCurrentSong = deckState.currentSong?.id === song.id;
+              const isQueuedSong = deckState.queuedSong?.id === song.id;
+              
+              return (
+                <button
+                  key={song.id}
+                  onClick={() => onSongSelect(song)}
+                  className={`w-full p-2 text-xs rounded transition-all font-mono relative ${
+                    isCurrentSong
+                      ? `${isLeft ? 'bg-blue-500/20 border-blue-400/40' : 'bg-red-500/20 border-red-400/40'} text-white border`
+                      : isQueuedSong
+                      ? 'bg-yellow-500/20 border border-yellow-400/40 text-yellow-200'
+                      : 'bg-black/20 border border-gray-300/10 text-gray-200/80 hover:bg-gray-300/10'
+                  }`}
+                  disabled={deckState.isLoading || deckState.isQueueLoading}
+                >
+                  <div className="truncate">{song.title}</div>
+                  {isQueuedSong && (
+                    <div className="absolute top-0 right-0 text-yellow-400 text-xs">Q</div>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Controls */}
@@ -76,18 +86,22 @@ function Deck({ side, djState, songs, onSongSelect, onTogglePlayback, onVolumeCh
             {/* Play/Pause Button */}
             <button
               onClick={onTogglePlayback}
-              disabled={!deckState.currentSong || deckState.isLoading}
+              disabled={(!deckState.currentSong && !deckState.queuedSong) || deckState.isLoading}
               className={`flex-1 py-2 px-3 rounded font-mono text-xs transition-all ${
                 deckState.isPlaying
-                  ? 'bg-red-500/20 border border-red-400/40 text-red-300 hover:bg-red-500/30'
+                  ? deckState.queuedSong
+                    ? 'bg-yellow-500/20 border border-yellow-400/40 text-yellow-300 hover:bg-yellow-500/30'
+                    : 'bg-red-500/20 border border-red-400/40 text-red-300 hover:bg-red-500/30'
                   : 'bg-green-500/20 border border-green-400/40 text-green-300 hover:bg-green-500/30'
               } disabled:bg-gray-500/20 disabled:border-gray-500/20 disabled:text-gray-500`}
             >
               {deckState.isLoading 
                 ? 'LOADING' 
-                : deckState.isPlaying 
-                  ? 'PAUSE' 
-                  : 'PLAY'
+                : deckState.isPlaying && deckState.queuedSong
+                  ? 'NEXT'
+                  : deckState.isPlaying 
+                    ? 'PAUSE' 
+                    : 'PLAY'
               }
             </button>
 
@@ -110,16 +124,31 @@ function Deck({ side, djState, songs, onSongSelect, onTogglePlayback, onVolumeCh
           </div>
 
           {/* Current Song Display */}
-          {deckState.currentSong && (
+          {(deckState.currentSong || deckState.queuedSong) && (
             <div className="mt-3 pt-3 border-t border-gray-300/10">
-              <div className="text-gray-200/80 text-xs font-mono text-center truncate">
-                {deckState.currentSong.title}
-              </div>
-              <div className={`text-center text-xs font-mono mt-1 ${
-                deckState.isPlaying ? 'text-red-400 animate-pulse' : 'text-gray-300/60'
-              }`}>
-                {deckState.isPlaying ? '● REC' : '○ STOP'}
-              </div>
+              {deckState.currentSong && (
+                <div>
+                  <div className="text-gray-200/80 text-xs font-mono text-center truncate">
+                    {deckState.currentSong.title}
+                  </div>
+                  <div className={`text-center text-xs font-mono mt-1 ${
+                    deckState.isPlaying ? 'text-red-400 animate-pulse' : 'text-gray-300/60'
+                  }`}>
+                    {deckState.isPlaying ? '● REC' : '○ STOP'}
+                  </div>
+                </div>
+              )}
+              
+              {deckState.queuedSong && (
+                <div className="mt-2 pt-2 border-t border-yellow-400/20">
+                  <div className="text-yellow-300/80 text-xs font-mono text-center truncate">
+                    NEXT: {deckState.queuedSong.title}
+                  </div>
+                  <div className="text-center text-xs font-mono mt-1 text-yellow-400/60">
+                    {deckState.isQueueLoading ? 'LOADING...' : '⏯ QUEUED'}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -266,19 +295,47 @@ export default function DJBoard() {
     setMasterVolume,
   } = useDJEngine();
 
-  // Sample songs
-  const sampleSongs: Song[] = [
+  // Left Deck Songs - Hip Hop & Electronic
+  const leftDeckSongs: Song[] = [
     {
-      id: '1',
+      id: 'L1',
       title: 'Cinematic Hip Hop Vlog Music',
       artist: 'Unknown Artist',
       url: '/audio/Cinematic Hip Hop Vlog Music.mp3'
     },
     {
-      id: '2', 
+      id: 'L2',
+      title: 'Happy Sad Feeling Guitar',
+      artist: 'RockerPlate',
+      url: '/audio/Happy Sad Feeling Guitar by RockerPlate.mp3'
+    },
+    {
+      id: 'L3',
+      title: 'Stargazer',
+      artist: 'Alien I Trust (125 BPM)',
+      url: '/audio/Stargazer by Alien I Trust 125 BPM.wav'
+    }
+  ];
+
+  // Right Deck Songs - Ambient & Guitar
+  const rightDeckSongs: Song[] = [
+    {
+      id: 'R1', 
       title: 'Tell Me What',
       artist: 'Unknown Artist',
       url: '/audio/Tell Me What.mp3'
+    },
+    {
+      id: 'R2',
+      title: 'Situation Sample Pack',
+      artist: 'Xhale303',
+      url: '/audio/Situation Sample Pack by Xhale303.wav'
+    },
+    {
+      id: 'R3',
+      title: 'Slow Ethereal Piano Loop',
+      artist: '80 BPM',
+      url: '/audio/Slow Ethereal Piano Loop 80 BPM.wav'
     }
   ];
 
@@ -288,7 +345,7 @@ export default function DJBoard() {
       <Deck
         side="left"
         djState={djState}
-        songs={sampleSongs}
+        songs={leftDeckSongs}
         onSongSelect={(song) => loadSong(song, 'left')}
         onTogglePlayback={() => togglePlayback('left')}
         onVolumeChange={(volume) => setDeckVolume('left', volume)}
@@ -298,7 +355,7 @@ export default function DJBoard() {
       <Deck
         side="right"
         djState={djState}
-        songs={sampleSongs}
+        songs={rightDeckSongs}
         onSongSelect={(song) => loadSong(song, 'right')}
         onTogglePlayback={() => togglePlayback('right')}
         onVolumeChange={(volume) => setDeckVolume('right', volume)}
