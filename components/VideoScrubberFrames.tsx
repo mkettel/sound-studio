@@ -6,7 +6,7 @@ import { gsap } from "gsap";
 interface VideoSegment {
   id: string;
   label: string;
-  frame: number; // Frame index instead of timestamp
+  frame: number; // Frame index instead of timestamp here
 }
 
 interface VideoScrubberFramesProps {
