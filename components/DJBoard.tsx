@@ -25,9 +25,9 @@ function Deck({ side, djState, songs, onSongSelect, onTogglePlayback, onVolumeCh
       }`}>
         
         {/* Collapse/Expand Button */}
-        <div className="flex items-center justify-between mb-2">
+        <div className={`flex items-center ${isExpanded ? 'justify-between' : 'justify-end'} mb-2`}>
           <div className={`text-amber-200 font-mono text-xs uppercase tracking-wider transition-opacity duration-300 ${
-            isExpanded ? 'opacity-100' : 'opacity-0'
+            isExpanded ? 'opacity-100' : 'opacity-0 hidden'
           }`}>
             {isLeft ? 'Left Record' : 'Right Record'}
           </div>
