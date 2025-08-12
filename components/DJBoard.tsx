@@ -239,7 +239,7 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
                   step="0.01"
                   value={value}
                   onChange={(e) => onChange(parseFloat(e.target.value))}
-                  className="w-56 h-2 bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
+                  className="w-fit h-2 bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="text-white text-xs font-mono mt-2">
                   {value < -0.1 ? 'LEFT' : value > 0.1 ? 'RIGHT' : 'CENTER'}
@@ -270,7 +270,7 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
                   step="0.01"
                   value={masterVolume}
                   onChange={(e) => onMasterVolumeChange(parseFloat(e.target.value))}
-                  className="w-24 h-2 bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
+                  className="w-fit h-2 bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="text-white text-xs font-mono mt-2">
                   {Math.round(masterVolume * 100)}%
