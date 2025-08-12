@@ -1,25 +1,43 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface AudioVisualizerProps {
   getFrequencyData: () => Uint8Array;
-  width?: number;
   height?: number;
-  barCount?: number;
   className?: string;
 }
 
 export default function AudioVisualizer({ 
   getFrequencyData, 
-  width = 120, 
-  height = 120, 
-  barCount = 64,
+  height = 120,
   className = ""
 }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
   const scrollOffsetRef = useRef<number>(0);
+  const [dimensions, setDimensions] = useState({ width: 120, height: height });
+
+  // ResizeObserver to detect container size changes
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        const { width } = entry.contentRect;
+        setDimensions({ width: Math.floor(width), height });
+      }
+    });
+
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [height]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -27,6 +45,11 @@ export default function AudioVisualizer({
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    const { width, height: canvasHeight } = dimensions;
+    
+    // Calculate optimal bar count based on width
+    const barCount = Math.max(10, Math.min(100, Math.floor(width / 8)));
 
     const draw = () => {
       const frequencyData = getFrequencyData();
@@ -39,7 +62,7 @@ export default function AudioVisualizer({
 
       if (!hasAudio) {
         // Draw blocky digital AUW
-        const blockSize = Math.max(8, Math.floor(height / 8));
+        const blockSize = Math.max(8, Math.floor(canvasHeight / 8));
         const letterSpacing = blockSize * 1.5;
         const letterHeight = blockSize * 7;
         const letterWidth = blockSize * 5;
@@ -47,7 +70,7 @@ export default function AudioVisualizer({
         // Calculate starting position to center all letters (A, U, W)
         const totalWidth = letterWidth * 3 + letterSpacing * 2;
         const startX = (width - totalWidth) / 2;
-        const startY = (height - letterHeight) / 2;
+        const startY = (canvasHeight - letterHeight) / 2;
         
         // Digital display colors
         const onColor = 'rgba(31, 41, 55, 0.9)'; // dark gray/black
@@ -120,13 +143,13 @@ export default function AudioVisualizer({
 
       for (let i = 0; i < barCount; i++) {
         const dataIndex = i * dataStep;
-        const barHeight = (frequencyData[dataIndex] / 255) * height;
+        const barHeight = (frequencyData[dataIndex] / 255) * canvasHeight;
         
         const x = i * barWidth;
-        const y = height - barHeight;
+        const y = canvasHeight - barHeight;
 
         // Create dark gradient for bars
-        const gradient = ctx.createLinearGradient(0, height, 0, 0);
+        const gradient = ctx.createLinearGradient(0, canvasHeight, 0, 0);
         gradient.addColorStop(0, 'rgba(31, 41, 55, 0.8)'); // gray-800 with opacity
         gradient.addColorStop(0.5, 'rgba(55, 65, 81, 0.9)'); // gray-700 with opacity
         gradient.addColorStop(1, 'rgba(75, 85, 99, 1)'); // gray-600
@@ -145,15 +168,21 @@ export default function AudioVisualizer({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [getFrequencyData, width, height, barCount]);
+  }, [getFrequencyData, dimensions]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      className={`rounded ${className}`}
-      style={{ background: 'transparent' }}
-    />
+    <div 
+      ref={containerRef}
+      className={`w-full ${className}`}
+      style={{ height: `${height}px` }}
+    >
+      <canvas
+        ref={canvasRef}
+        width={dimensions.width}
+        height={dimensions.height}
+        className="rounded w-full h-full"
+        style={{ background: 'transparent' }}
+      />
+    </div>
   );
 }

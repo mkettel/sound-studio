@@ -252,9 +252,7 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
             <div className="flex items-center bg-white/10 rounded-lg overflow-hidden flex-1 justify-center">
               <AudioVisualizer 
                 getFrequencyData={getFrequencyData} 
-                width={isMobile ? 200 : 500} 
-                height={70} 
-                barCount={isMobile ? 25 : 50}
+                height={70}
               />
             </div>
 
@@ -305,9 +303,7 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
             <div className="flex-1 flex justify-center">
               <AudioVisualizer 
                 getFrequencyData={getFrequencyData} 
-                width={isMobile ? 100 : 500} 
-                height={isMobile ? 50 : 100} 
-                barCount={20}
+                height={isMobile ? 50 : 100}
               />
             </div>
 
