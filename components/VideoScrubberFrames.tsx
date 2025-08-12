@@ -42,7 +42,7 @@ export default function VideoScrubberFrames({
 
   // Generate frame path
   const getFramePath = (index: number): string => {
-    return `/frames-optimized/frame_${(index + 1).toString().padStart(4, '0')}.jpg`;
+    return `/frames-premium/frame_${(index + 1).toString().padStart(4, '0')}.jpg`;
   };
 
   // Render function (exactly like Apple's technique)
