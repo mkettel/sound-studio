@@ -217,7 +217,7 @@ export default function VideoScrubberFrames({
       
       {/* Navigation Buttons */}
       {isLoaded && (
-        <div className="absolute hidden bottom-0 right-0 z-10">
+        <div className="absolute  bottom-0 right-0 z-10">
           <div className="bg-gradient-to-t from-black/80 via-black/60 to-transparent h-0 flex items-end">
             <div className="w-full flex justify-end pb-2">
               <div className="flex flex-col gap-1">
