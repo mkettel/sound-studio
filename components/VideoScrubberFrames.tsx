@@ -35,11 +35,14 @@ export default function VideoScrubberFrames({
   frameCount = 260,
   segments = defaultSegments,
 }: VideoScrubberFramesProps) {
+  console.log("🎬 VideoScrubberFrames component loaded!");
+  
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
   const [activeSegment, setActiveSegment] = useState<string>("home");
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isLooping, setIsLooping] = useState(true);
 
   // Image cache and loading
   const images = useRef<HTMLImageElement[]>([]);
@@ -109,6 +112,23 @@ export default function VideoScrubberFrames({
     }
   };
 
+  // Get loop frames for a position
+  const getLoopFrames = (position: string): number[] => {
+    switch(position) {
+      case "home":
+        // Wide loop: frames 1-30
+        return Array.from({ length: 30 }, (_, i) => 1 + i);
+      case "left-record":
+        // Left loop: frames 80-110  
+        return Array.from({ length: 31 }, (_, i) => 80 + i);
+      case "right-record":
+        // Right loop: frames 170-200
+        return Array.from({ length: 31 }, (_, i) => 170 + i);
+      default:
+        return [1]; // Fallback to first frame
+    }
+  };
+
   // Get transition frames for movement between positions
   const getTransitionFrames = (from: string, to: string): number[] => {
     if (from === "home" && to === "left-record") {
@@ -141,38 +161,111 @@ export default function VideoScrubberFrames({
     getAvailableButtons(activeSegment).includes(segment.id)
   );
 
-  // Navigate to segment with transition animation
-  const navigateToSegment = (segment: VideoSegment) => {
-    setIsTransitioning(true);
+  // Start looping animation for current position
+  const startPositionLoop = (position: string) => {
+    console.log(`🔄 Starting loop for position: ${position}, isLooping: ${isLooping}`);
+    
+    if (!isLooping) {
+      console.log("❌ Loop cancelled - isLooping is false");
+      return;
+    }
+    
+    const loopFrames = getLoopFrames(position);
+    console.log(`📍 Loop frames for ${position}:`, loopFrames);
+    
+    if (loopFrames.length <= 1) {
+      console.log("❌ Loop cancelled - not enough frames");
+      return;
+    }
 
     // Kill existing animation
     if (tlRef.current) {
+      console.log("🛑 Killing existing animation");
+      tlRef.current.kill();
+    }
+
+    // Create infinite loop animation
+    tlRef.current = gsap.timeline({
+      repeat: -1, // Infinite loop
+      onUpdate: render,
+      onStart: () => console.log(`✅ Loop animation started for ${position}`),
+      onRepeat: () => console.log(`🔁 Loop repeating for ${position}`)
+    });
+
+    // Cycle through loop frames smoothly
+    const duration = loopFrames.length * 0.1; // Slower, more subtle
+    console.log(`⏱️ Loop duration: ${duration}s for ${loopFrames.length} frames`);
+    
+    tlRef.current.to(frameController.current, {
+      frame: loopFrames[loopFrames.length - 1],
+      duration: duration,
+      ease: "none", // Linear for smooth looping
+      snap: "frame",
+      onUpdate: () => {
+        // Map progress to loop frame sequence
+        const progress = tlRef.current!.progress();
+        const frameIndex = Math.floor(progress * (loopFrames.length - 1));
+        frameController.current.frame = loopFrames[frameIndex];
+      }
+    });
+  };
+
+  // Navigate to segment with transition animation
+  const navigateToSegment = (segment: VideoSegment) => {
+    console.log(`🚀 Navigation: ${activeSegment} → ${segment.id}`);
+    
+    setIsTransitioning(true);
+    setIsLooping(false); // Stop looping during transition
+    console.log("🛑 Stopping loops for transition");
+
+    // Kill existing animation
+    if (tlRef.current) {
+      console.log("🛑 Killing existing animation for transition");
       tlRef.current.kill();
     }
 
     // Get transition frames
     const transitionFrames = getTransitionFrames(activeSegment, segment.id);
+    console.log(`🎬 Transition frames (${activeSegment} → ${segment.id}):`, transitionFrames);
     
     if (transitionFrames.length === 0) {
+      console.log("⚡ Direct jump - no transition needed");
       // Direct jump (no transition)
       frameController.current.frame = segment.frame;
       setActiveSegment(segment.id);
       setIsTransitioning(false);
+      setIsLooping(true);
+      // Start loop after a brief delay
+      setTimeout(() => {
+        console.log("🔄 Starting loop after direct jump");
+        startPositionLoop(segment.id);
+      }, 100);
       render();
       return;
     }
 
+    console.log(`🎬 Starting transition animation (${transitionFrames.length} frames)`);
+
     // Create GSAP timeline for smooth transition
     tlRef.current = gsap.timeline({
       onUpdate: render,
+      onStart: () => console.log("✅ Transition animation started"),
       onComplete: () => {
+        console.log(`🏁 Transition complete: now at ${segment.id}`);
         setActiveSegment(segment.id);
         setIsTransitioning(false);
+        setIsLooping(true);
+        // Start position loop after transition
+        setTimeout(() => {
+          console.log("🔄 Starting loop after transition");
+          startPositionLoop(segment.id);
+        }, 100);
       }
     });
 
     // Animate through each transition frame
     const duration = Math.max(1.0, transitionFrames.length * 0.03); // ~30fps feeling
+    console.log(`⏱️ Transition duration: ${duration}s`);
     
     tlRef.current.to(frameController.current, {
       frame: transitionFrames[transitionFrames.length - 1],
@@ -224,13 +317,17 @@ export default function VideoScrubberFrames({
           loadedCount.current++;
           setLoadProgress((loadedCount.current / frameCount) * 100);
           
+          console.log(`📸 Frame ${frameIndex} loaded (${loadedCount.current}/${frameCount})`);
+          
           // Render first frame when loaded
           if (frameIndex === 1) {
+            console.log("🎬 First frame rendered!");
             render();
           }
           
           // Mark as loaded when priority frames are ready
           if (loadedCount.current >= priorityFrames.length && !isLoaded) {
+            console.log(`✅ Priority frames loaded! Setting isLoaded to true (${loadedCount.current}/${priorityFrames.length})`);
             setIsLoaded(true);
           }
           
@@ -275,6 +372,18 @@ export default function VideoScrubberFrames({
       }
     };
   }, [frameCount, segments, render, isLoaded]);
+
+  // Start initial loop when loaded
+  useEffect(() => {
+    console.log(`🎯 useEffect triggered - isLoaded: ${isLoaded}, isTransitioning: ${isTransitioning}, activeSegment: ${activeSegment}`);
+    
+    if (isLoaded && !isTransitioning) {
+      console.log("🎬 Conditions met - starting initial loop");
+      startPositionLoop(activeSegment);
+    } else {
+      console.log("⏳ Waiting for conditions - not starting loop yet");
+    }
+  }, [isLoaded, activeSegment, isTransitioning]);
 
   return (
     <div className="relative w-full h-full">
