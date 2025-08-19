@@ -14,16 +14,25 @@ interface VideoScrubberFramesProps {
   segments?: VideoSegment[];
 }
 
-// Map your sequence positions to frames
+// New transition-based frame mapping
+const frameSegments = {
+  wideLoop: { start: 1, end: 30 },           // Wide position loop
+  wideToLeft: { start: 30, end: 80 },        // Wide → Left transition
+  leftLoop: { start: 80, end: 110 },         // Left position loop  
+  leftToRight: { start: 110, end: 170 },     // Left → Right transition
+  rightLoop: { start: 170, end: 200 },       // Right position loop
+  rightToWide: { start: 200, end: 260 }      // Right → Wide transition
+};
+
+// Map your sequence positions to frame ranges
 const defaultSegments: VideoSegment[] = [
-  { id: "home", label: "HOME", frame: 0 },                    // Wide shot starting position
-  { id: "left-record", label: "LEFT RECORD", frame: 75 },     // Left turntable detail
-  { id: "control-panel", label: "CONTROL PANEL", frame: 154 }, // Center console detail  
-  { id: "right-record", label: "RIGHT RECORD", frame: 225 }   // Right turntable detail
+  { id: "home", label: "HOME", frame: 1 },                    // Wide shot starting position
+  { id: "left-record", label: "LEFT RECORD", frame: 80 },     // Left turntable detail
+  { id: "right-record", label: "RIGHT RECORD", frame: 170 }   // Right turntable detail
 ];
 
 export default function VideoScrubberFrames({
-  frameCount = 300,
+  frameCount = 260,
   segments = defaultSegments,
 }: VideoScrubberFramesProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -37,12 +46,30 @@ export default function VideoScrubberFrames({
   const loadedCount = useRef(0);
 
   // Animation controller (like Apple's example)
-  const frameController = useRef({ frame: 0 });
+  const frameController = useRef({ frame: 1 });
   const tlRef = useRef<gsap.core.Timeline | null>(null);
 
-  // Generate frame path
+  // Generate frame path using optimized JPG frames
   const getFramePath = (index: number): string => {
-    return `/frames-premium/frame_${(index + 1).toString().padStart(4, '0')}.jpg`;
+    const frameNumber = index.toString().padStart(4, '0');
+    
+    // All frames now use optimized JPG versions
+    if (index >= 1 && index <= 30) {
+      return `/frames-new-optimized/AUW Web Sequence wide loop Test 1/${frameNumber}.jpg`;
+    } else if (index >= 30 && index <= 80) {
+      return `/frames-new-optimized/AUW Web Sequence transition wide to left Test 1/${frameNumber}.jpg`;
+    } else if (index >= 80 && index <= 110) {
+      return `/frames-new-optimized/AUW Web Sequence loop left Test 1/${frameNumber}.jpg`;
+    } else if (index >= 110 && index <= 170) {
+      return `/frames-new-optimized/AUW Web Sequence transition left right Test 1/${frameNumber}.jpg`;
+    } else if (index >= 170 && index <= 200) {
+      return `/frames-new-optimized/AUW Web Sequence loop right Test 1/${frameNumber}.jpg`;
+    } else if (index >= 200 && index <= 260) {
+      return `/frames-new-optimized/AUW Web Sequence Transition right to wide Test 1/${frameNumber}.jpg`;
+    }
+    
+    // Fallback to first frame
+    return `/frames-new-optimized/AUW Web Sequence wide loop Test 1/0001.jpg`;
   };
 
   // Render function (exactly like Apple's technique)
@@ -66,18 +93,47 @@ export default function VideoScrubberFrames({
   const getAvailableButtons = (currentSegment: string): string[] => {
     switch(currentSegment) {
       case "home":
-        // From wide shot, can go to any detail view
-        return ["left-record", "control-panel", "right-record"];
+        // From wide shot, can go to left or right
+        return ["left-record", "right-record"];
         
       case "left-record":
-      case "control-panel": 
+        // From left view, can go to right or back home
+        return ["home", "right-record"];
+        
       case "right-record":
-        // From any detail view, can only return home
-        return ["home"];
+        // From right view, can go to left or back home  
+        return ["home", "left-record"];
         
       default:
         return ["home"];
     }
+  };
+
+  // Get transition frames for movement between positions
+  const getTransitionFrames = (from: string, to: string): number[] => {
+    if (from === "home" && to === "left-record") {
+      // Wide to Left: frames 30-80
+      return Array.from({ length: 51 }, (_, i) => 30 + i);
+    } else if (from === "left-record" && to === "home") {
+      // Left to Wide (reverse): frames 80-30
+      return Array.from({ length: 51 }, (_, i) => 80 - i);
+    } else if (from === "left-record" && to === "right-record") {
+      // Left to Right: frames 110-170
+      return Array.from({ length: 61 }, (_, i) => 110 + i);
+    } else if (from === "right-record" && to === "left-record") {
+      // Right to Left (reverse): frames 170-110
+      return Array.from({ length: 61 }, (_, i) => 170 - i);
+    } else if (from === "right-record" && to === "home") {
+      // Right to Wide: frames 200-260, then jump back to wide start
+      const rightToWideFrames = Array.from({ length: 61 }, (_, i) => 200 + i);
+      return [...rightToWideFrames, 1]; // End at wide position
+    } else if (from === "home" && to === "right-record") {
+      // Wide to Right: We need to go through left first, or create direct path
+      // For now, let's create a direct wide-to-right path using reverse of right-to-wide
+      return Array.from({ length: 61 }, (_, i) => 260 - i);
+    }
+    
+    return []; // No transition needed
   };
 
   // Get segments available for current position
@@ -85,9 +141,8 @@ export default function VideoScrubberFrames({
     getAvailableButtons(activeSegment).includes(segment.id)
   );
 
-  // Navigate to segment with GSAP
+  // Navigate to segment with transition animation
   const navigateToSegment = (segment: VideoSegment) => {
-    setActiveSegment(segment.id);
     setIsTransitioning(true);
 
     // Kill existing animation
@@ -95,24 +150,41 @@ export default function VideoScrubberFrames({
       tlRef.current.kill();
     }
 
-    // Calculate smooth duration based on distance
-    const distance = Math.abs(segment.frame - frameController.current.frame);
-    const duration = Math.max(0.6, distance / frameCount * 3.5); // Smooth timing
+    // Get transition frames
+    const transitionFrames = getTransitionFrames(activeSegment, segment.id);
+    
+    if (transitionFrames.length === 0) {
+      // Direct jump (no transition)
+      frameController.current.frame = segment.frame;
+      setActiveSegment(segment.id);
+      setIsTransitioning(false);
+      render();
+      return;
+    }
 
-    // Create GSAP timeline (like Apple)
+    // Create GSAP timeline for smooth transition
     tlRef.current = gsap.timeline({
       onUpdate: render,
       onComplete: () => {
+        setActiveSegment(segment.id);
         setIsTransitioning(false);
       }
     });
 
-    // Animate frame with smooth easing
+    // Animate through each transition frame
+    const duration = Math.max(1.0, transitionFrames.length * 0.03); // ~30fps feeling
+    
     tlRef.current.to(frameController.current, {
-      frame: segment.frame,
+      frame: transitionFrames[transitionFrames.length - 1],
       duration: duration,
-      ease: "power2.out",
-      snap: "frame" // Ensure integer frame values
+      ease: "power2.inOut",
+      snap: "frame",
+      onUpdate: () => {
+        // Map progress to frame sequence
+        const progress = tlRef.current!.progress();
+        const frameIndex = Math.floor(progress * (transitionFrames.length - 1));
+        frameController.current.frame = transitionFrames[frameIndex];
+      }
     });
   };
 
@@ -136,8 +208,8 @@ export default function VideoScrubberFrames({
       }
     });
 
-    // Add remaining frames
-    for (let i = 0; i < frameCount; i++) {
+    // Add remaining frames (starting from 1, not 0)
+    for (let i = 1; i <= frameCount; i++) {
       if (!loadQueue.includes(i)) {
         loadQueue.push(i);
       }
@@ -153,7 +225,7 @@ export default function VideoScrubberFrames({
           setLoadProgress((loadedCount.current / frameCount) * 100);
           
           // Render first frame when loaded
-          if (frameIndex === 0) {
+          if (frameIndex === 1) {
             render();
           }
           
