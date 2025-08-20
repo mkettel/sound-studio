@@ -75,7 +75,7 @@ export default function VideoScrubberFrames({
     return `/frames-new-optimized/AUW Web Sequence wide loop Test 1/0001.jpg`;
   };
 
-  // Render function (exactly like Apple's technique)
+  // Render function (back to simple scaling)
   const render = useCallback(() => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext('2d');
@@ -286,7 +286,7 @@ export default function VideoScrubberFrames({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Set canvas size (adjust to your frame dimensions)
+    // Set canvas size back to what was working before
     canvas.width = 1920;
     canvas.height = 1080;
 
