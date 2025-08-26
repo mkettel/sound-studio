@@ -167,6 +167,8 @@ export default function Home() {
         onLeftNext={handleLeftNext}
         onRightPrev={handleRightPrev}
         onRightNext={handleRightNext}
+        crossfaderValue={djState.crossfaderValue}
+        onCrossfaderChange={setCrossfader}
       />
     </main>
   );

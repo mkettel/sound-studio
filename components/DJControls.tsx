@@ -13,6 +13,8 @@ interface DJControlsProps {
   onLeftNext?: () => void;
   onRightPrev?: () => void;
   onRightNext?: () => void;
+  crossfaderValue?: number;
+  onCrossfaderChange?: (value: number) => void;
 }
 
 export default function DJControls({ 
@@ -24,7 +26,9 @@ export default function DJControls({
   onLeftPrev = () => {},
   onLeftNext = () => {},
   onRightPrev = () => {},
-  onRightNext = () => {}
+  onRightNext = () => {},
+  crossfaderValue = 0,
+  onCrossfaderChange = () => {}
 }: DJControlsProps) {
 
     return (
@@ -126,6 +130,31 @@ export default function DJControls({
           </div>
         )}
         
+        {/* Crossfader - Same level as song controls but centered */}
+        <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-40">
+          <div className=" px-6 py-4">
+            <div className="flex items-center space-x-6">
+              <div className="text-white text-sm font-mono">L</div>
+              <div className="flex flex-col items-center">
+                <div className="text-white text-xs font-mono mb-2 uppercase tracking-wider">CROSSFADER</div>
+                <input
+                  type="range"
+                  min="-1"
+                  max="1"
+                  step="0.01"
+                  value={crossfaderValue}
+                  onChange={(e) => onCrossfaderChange(parseFloat(e.target.value))}
+                  className="w-48 h-2  rounded-lg  cursor-pointer "
+                />
+                <div className="text-white text-xs font-mono mt-2">
+                  {crossfaderValue < -0.1 ? 'LEFT' : crossfaderValue > 0.1 ? 'RIGHT' : 'CENTER'}
+                </div>
+              </div>
+              <div className="text-white text-sm font-mono">R</div>
+            </div>
+          </div>
+        </div>
+
         {/* Button Group */}
         
 
