@@ -65,15 +65,15 @@ export default function Home() {
   const [leftSongIndex, setLeftSongIndex] = useState(0);
   const [rightSongIndex, setRightSongIndex] = useState(0);
 
-  // Auto-load first songs on mount
+  // Auto-load first songs on mount - using useEffect with empty dependency array
   useEffect(() => {
-    if (leftDeckSongs.length > 0 && !djState.leftDeck.currentSong) {
+    if (leftDeckSongs.length > 0) {
       loadSong(leftDeckSongs[0], 'left');
     }
-    if (rightDeckSongs.length > 0 && !djState.rightDeck.currentSong) {
+    if (rightDeckSongs.length > 0) {
       loadSong(rightDeckSongs[0], 'right');
     }
-  }, [djState.leftDeck.currentSong, djState.rightDeck.currentSong, loadSong]);
+  }, []); // Empty dependency array - only run once on mount
 
   // Navigation functions that force immediate switching
   const handleLeftPrev = () => {
