@@ -1,201 +1,44 @@
 "use client";
 
 import { useDJEngine, Song } from '@/hooks/useDJEngine';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AudioVisualizer from './AudioVisualizer';
 import { useIsMobile } from '@/hooks/useIsMobile';
 
-// Deck Component
-interface DeckProps {
-  side: 'left' | 'right';
+// Control Panel Component
+interface ControlPanelProps {
   djState: any;
-  songs: Song[];
-  onSongSelect: (song: Song) => void;
-  onTogglePlayback: () => void;
-  onVolumeChange: (volume: number) => void;
-}
-
-function Deck({ side, djState, songs, onSongSelect, onTogglePlayback, onVolumeChange }: DeckProps) {
-  const deckState = side === 'left' ? djState.leftDeck : djState.rightDeck;
-  const isLeft = side === 'left';
-  const [isExpanded, setIsExpanded] = useState(true);
-
-  const isMobile = useIsMobile();
-
-  return (
-    <div className={`fixed top-4 ${isLeft ? 'left-4' : 'right-4'} z-40 transition-all duration-300`}>
-      <div className={`bg-gradient-to-b from-gray-100/10 to-gray-200/5 backdrop-blur-md rounded-lg border border-gray-300/20 shadow-2xl transition-all duration-300 ${
-        isExpanded ? 'w-64 p-4' : 'w-16 p-2'
-      }`}>
-        
-        {/* Collapse/Expand Button */}
-        <div className={`flex items-center ${isExpanded ? 'justify-between' : 'justify-end'} mb-2`}>
-          <div className={`text-gray-200 font-mono text-xs uppercase tracking-wider transition-opacity duration-300 ${
-            isExpanded ? 'opacity-100' : 'opacity-0 hidden'
-          }`}>
-            {isLeft ? 'Left Record' : 'Right Record'}
-          </div>
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="text-gray-300/60 hover:text-gray-200 transition-colors p-1 rounded"
-          >
-            <div className="w-3 h-3 flex items-center justify-center">
-              {isExpanded ? '−' : '+'}
-            </div>
-          </button>
-        </div>
-
-        {/* Status Indicator */}
-        <div className="flex justify-center mb-3">
-          <div className={`h-1 rounded-full transition-all duration-300 ${
-            isExpanded ? 'w-8' : 'w-10'
-          } ${deckState.isPlaying ? 'bg-red-500 animate-pulse' : 'bg-gray-300/30'}`} />
-        </div>
-
-        {/* Expanded Content */}
-        <div className={`transition-all duration-300 overflow-hidden ${
-          isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-        }`}>
-          {/* Song Selection */}
-          <div className="space-y-1 bg-black/10 rounded-md p-2 mb-4">
-            {songs.map((song) => {
-              const isCurrentSong = deckState.currentSong?.id === song.id;
-              const isQueuedSong = deckState.queuedSong?.id === song.id;
-              
-              return (
-                <button
-                  key={song.id}
-                  onClick={() => onSongSelect(song)}
-                  className={`w-full text-left p-1 text-xs rounded transition-all font-mono relative ${
-                    isCurrentSong
-                      ? `${isLeft ? 'underline' : 'underline'} text-white `
-                      : isQueuedSong
-                      ? 'bg-yellow-500/20 border border-yellow-400/40 text-yellow-200'
-                      : 'bg-black/0  border-gray-300/10 text-gray-200/80 hover:underline'
-                  }`}
-                  disabled={deckState.isLoading || deckState.isQueueLoading}
-                >
-                  <div className="truncate">{song.title}</div>
-                  {isQueuedSong && (
-                    <div className="absolute top-1 right-1 text-yellow-400 text-xs">Q</div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Controls */}
-          <div className="flex items-center space-x-3">
-            
-            {/* Play/Pause Button */}
-            <button
-              onClick={onTogglePlayback}
-              disabled={(!deckState.currentSong && !deckState.queuedSong) || deckState.isLoading}
-              className={`flex-1 py-2 px-3 rounded font-mono text-xs transition-all ${
-                deckState.isPlaying
-                  ? deckState.queuedSong
-                    ? 'bg-yellow-500/20 border border-yellow-400/40 text-yellow-300 hover:bg-yellow-500/30'
-                    : 'bg-red-500/20 border border-red-400/40 text-red-300 hover:bg-red-500/30'
-                  : 'bg-green-500/20 border border-green-400/40 text-green-300 hover:bg-green-500/30'
-              } disabled:bg-gray-500/20 disabled:border-gray-500/20 disabled:text-gray-500`}
-            >
-              {deckState.isLoading 
-                ? 'LOADING' 
-                : deckState.isPlaying && deckState.queuedSong
-                  ? 'NEXT'
-                  : deckState.isPlaying 
-                    ? 'PAUSE' 
-                    : 'PLAY'
-              }
-            </button>
-
-            {/* Vertical Volume Slider */}
-            <div className="flex flex-col relative items-end">
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={deckState.volume}
-                onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-                className=" w-full bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
-              />
-              <div className="text-gray-300/60 text-xs font-mono mt-1">VOL</div>
-              <div className="text-gray-300/60 text-xs font-mono">
-                {Math.round(deckState.volume * 100)}
-              </div>
-            </div>
-          </div>
-
-          {/* Current Song Display */}
-          {(deckState.currentSong || deckState.queuedSong) && (
-            <div className="mt-3 pt-3 border-t border-gray-300/10">
-              {deckState.currentSong && (
-                <div>
-                  <div className="text-gray-200/80 text-xs font-mono text-center truncate">
-                    {deckState.currentSong.title}
-                  </div>
-                  <div className={`text-center text-xs font-mono mt-1 ${
-                    deckState.isPlaying ? 'text-red-400 animate-pulse' : 'text-gray-300/60'
-                  }`}>
-                    {deckState.isPlaying ? '● REC' : '○ STOP'}
-                  </div>
-                </div>
-              )}
-              
-              {deckState.queuedSong && (
-                <div className="mt-2 pt-2 border-t border-yellow-400/20">
-                  <div className="text-yellow-300/80 text-xs font-mono text-center truncate">
-                    NEXT: {deckState.queuedSong.title}
-                  </div>
-                  <div className="text-center text-xs font-mono mt-1 text-yellow-400/60">
-                    {deckState.isQueueLoading ? 'LOADING...' : '⏯ QUEUED'}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Collapsed Content - Quick Controls */}
-        <div className={`transition-all duration-300 ${
-          isExpanded ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-32 opacity-100'
-        }`}>
-          {/* Quick Play/Pause */}
-          <button
-            onClick={onTogglePlayback}
-            disabled={!deckState.currentSong || deckState.isLoading}
-            className={`w-full py-2 mb-2 rounded font-mono text-xs transition-all ${
-              deckState.isPlaying
-                ? 'bg-red-500/20 text-red-300'
-                : 'bg-green-500/20 text-green-300'
-            } disabled:bg-gray-500/20 disabled:text-gray-500`}
-          >
-            {deckState.isPlaying ? '⏸' : '▶'}
-          </button>
-          
-          {/* Mini Volume */}
-          <div className="text-center">
-            <div className="text-gray-300/60 text-xs font-mono mb-1">
-              {Math.round(deckState.volume * 100)}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Crossfader Component
-interface CrossfaderProps {
-  value: number;
-  onChange: (value: number) => void;
+  leftDeckSongs: Song[];
+  rightDeckSongs: Song[];
+  onLeftTogglePlayback: () => void;
+  onRightTogglePlayback: () => void;
+  onLeftPrev: () => void;
+  onLeftNext: () => void;
+  onRightPrev: () => void;
+  onRightNext: () => void;
+  crossfaderValue: number;
+  onCrossfaderChange: (value: number) => void;
   masterVolume: number;
   onMasterVolumeChange: (volume: number) => void;
   getFrequencyData: () => Uint8Array;
 }
 
-function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFrequencyData }: CrossfaderProps) {
+function ControlPanel({ 
+  djState, 
+  leftDeckSongs, 
+  rightDeckSongs, 
+  onLeftTogglePlayback, 
+  onRightTogglePlayback,
+  onLeftPrev,
+  onLeftNext,
+  onRightPrev,
+  onRightNext,
+  crossfaderValue,
+  onCrossfaderChange,
+  masterVolume, 
+  onMasterVolumeChange, 
+  getFrequencyData 
+}: ControlPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const isMobile = useIsMobile();
   return (
@@ -205,7 +48,7 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
       }`} style={{ minWidth: '75vw' }}>
         
         {/* Control Panel Header */}
-        <div className="flex items-center hidden justify-between mb-2">
+        <div className=" items-center hidden justify-between mb-2">
           <div className={`text-gray-200 font-mono text-xs uppercase tracking-wider transition-opacity duration-300 ${
             isExpanded ? 'opacity-100' : 'opacity-0'
           }`}>
@@ -225,9 +68,9 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
         <div className={`transition-all duration-300 overflow-hidden ${
           isExpanded ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'
         }`}>
-          <div className="flex items-center justify-between space-x-6">
+          <div className="flex items-center justify-between">
             
-            {/* Left Side - Crossfader */}
+            {/* Left Side - Crossfader
             <div className="flex items-center space-x-6">
               <div className="text-white text-xs font-mono">L</div>
               <div className="flex flex-col items-center">
@@ -237,15 +80,59 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
                   min="-1"
                   max="1"
                   step="0.01"
-                  value={value}
-                  onChange={(e) => onChange(parseFloat(e.target.value))}
+                  value={crossfaderValue}
+                  onChange={(e) => onCrossfaderChange(parseFloat(e.target.value))}
                   className="w-fit h-2 bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="text-white text-xs font-mono mt-2">
-                  {value < -0.1 ? 'LEFT' : value > 0.1 ? 'RIGHT' : 'CENTER'}
+                  {crossfaderValue < -0.1 ? 'LEFT' : crossfaderValue > 0.1 ? 'RIGHT' : 'CENTER'}
                 </div>
               </div>
               <div className="text-white text-xs font-mono">R</div>
+            </div> */}
+
+            <div className="flex mr-4 gap-2">
+              {/* Left Deck Info */}
+              <div className="w-10 h-10 bg-white/10 rounded-md overflow-hidden">
+                <img src="/song-thumb.png" alt="Song Thumbnail" width={40} height={40}/>
+              </div>
+              <div className="flex flex-col items-start h-full">
+                <div className="text-white text-xs font-mono truncate max-w-32">
+                  {djState.leftDeck.currentSong?.title || 'No Song'}
+                </div>
+                <div className="text-white/60 text-xs font-mono truncate max-w-32">
+                  {djState.leftDeck.currentSong?.artist || 'Unknown'}
+                </div>
+              </div>
+              {/* Left Deck Controls */}
+              <div className="flex gap-2 mx-4">
+                <button 
+                  onClick={onLeftTogglePlayback} 
+                  className={`${djState.leftDeck.isPlaying ? 'text-red-400' : 'text-green-400'} hover:text-white transition-colors mr-2`}
+                  disabled={!djState.leftDeck.currentSong || djState.leftDeck.isLoading}
+                >
+                  {djState.leftDeck.isPlaying ? (
+                    <div className="w-3 h-3 flex gap-0.5 items-center">
+                      <div className="bg-current h-3 w-1"></div>
+                      <div className="bg-current h-3 w-1"></div>
+                    </div>
+                  ) : (
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12.5 7.5L0.500001 12.5L1.5 6.5L0.5 0.5L12.5 5.5L12.5 7.5Z" fill="currentColor"/>
+                    </svg>
+                  )}
+                </button>
+                <button onClick={onLeftPrev} className="text-white hover:text-white/70 transition-colors" disabled={djState.leftDeck.isLoading}>
+                  <svg width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4.37114e-07 7.5L12 12.5L11 6.5L12 0.5L6.11959e-07 5.5L4.37114e-07 7.5Z" fill="currentColor"/>
+                  </svg>  
+                </button>
+                <button onClick={onLeftNext} className="text-white hover:text-white/70 transition-colors" disabled={djState.leftDeck.isLoading}>
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.5 7.5L0.500001 12.5L1.5 6.5L0.5 0.5L12.5 5.5L12.5 7.5Z" fill="currentColor"/>
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {/* Center - Audio Visualizer */}
@@ -256,8 +143,52 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
               />
             </div>
 
+            <div className="flex flex-row-reverse gap-2 ml-4">
+              {/* Right Deck Info */}
+              <div className="w-10 h-10 bg-white/10 rounded-md overflow-hidden">
+                <img src="/song-thumb.png" alt="Song Thumbnail" width={40} height={40}/>
+              </div>
+              <div className="flex flex-col items-end h-full">
+                <div className="text-white text-xs font-mono truncate max-w-32">
+                  {djState.rightDeck.currentSong?.title || 'No Song'}
+                </div>
+                <div className="text-white/60 text-xs font-mono truncate max-w-32">
+                  {djState.rightDeck.currentSong?.artist || 'Unknown'}
+                </div>
+              </div>
+              {/* Right Deck Controls */}
+              <div className="flex gap-2 mx-4">
+                <button onClick={onRightPrev} className="text-white hover:text-white/70 transition-colors" disabled={djState.rightDeck.isLoading}>
+                  <svg width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4.37114e-07 7.5L12 12.5L11 6.5L12 0.5L6.11959e-07 5.5L4.37114e-07 7.5Z" fill="currentColor"/>
+                  </svg>  
+                </button>
+                <button onClick={onRightNext} className="text-white hover:text-white/70 transition-colors" disabled={djState.rightDeck.isLoading}>
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.5 7.5L0.500001 12.5L1.5 6.5L0.5 0.5L12.5 5.5L12.5 7.5Z" fill="currentColor"/>
+                  </svg>
+                </button>
+                <button 
+                  onClick={onRightTogglePlayback} 
+                  className={`${djState.rightDeck.isPlaying ? 'text-red-400' : 'text-green-400'} hover:text-white transition-colors ml-2`}
+                  disabled={!djState.rightDeck.currentSong || djState.rightDeck.isLoading}
+                >
+                  {djState.rightDeck.isPlaying ? (
+                    <div className="w-3 h-3 flex gap-0.5 items-center">
+                      <div className="bg-current h-3 w-1"></div>
+                      <div className="bg-current h-3 w-1"></div>
+                    </div>
+                  ) : (
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12.5 7.5L0.500001 12.5L1.5 6.5L0.5 0.5L12.5 5.5L12.5 7.5Z" fill="currentColor"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
             {/* Right Side - Master Volume */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center hidden space-x-3">
               <div className="text-white text-xs font-mono">MASTER</div>
               <div className="flex flex-col items-center">
                 <div className="text-white text-xs font-mono mb-2">VOLUME</div>
@@ -292,11 +223,18 @@ function Crossfader({ value, onChange, masterVolume, onMasterVolumeChange, getFr
                 min="-1"
                 max="1"
                 step="0.01"
-                value={value}
-                onChange={(e) => onChange(parseFloat(e.target.value))}
+                value={crossfaderValue}
+                onChange={(e) => onCrossfaderChange(parseFloat(e.target.value))}
                 className="w-32 h-1 bg-gray-300/20 rounded-lg appearance-none cursor-pointer"
               />
               <div className="text-white text-xs font-mono">R</div>
+            </div>
+
+            <div className="flex gap-2 items-center">
+              {/* Song Thumbnail */}
+              <div className="w-10 h-10 bg-white/10 rounded-md">
+                <img src="/song-thumb.png" alt="Song Thumbnail" width={40} height={40} />
+              </div>
             </div>
 
             {/* Mini Visualizer - Center */}
@@ -385,36 +323,109 @@ export default function DJBoard() {
     }
   ];
 
+  // Track current song indices
+  const [leftSongIndex, setLeftSongIndex] = useState(0);
+  const [rightSongIndex, setRightSongIndex] = useState(0);
+
+  // Auto-load first songs on mount
+  useEffect(() => {
+    if (leftDeckSongs.length > 0 && !djState.leftDeck.currentSong) {
+      loadSong(leftDeckSongs[0], 'left');
+    }
+    if (rightDeckSongs.length > 0 && !djState.rightDeck.currentSong) {
+      loadSong(rightDeckSongs[0], 'right');
+    }
+  }, [djState.leftDeck.currentSong, djState.rightDeck.currentSong, loadSong]);
+
+  // Navigation functions that force immediate switching
+  const handleLeftPrev = () => {
+    const prevIndex = leftSongIndex > 0 ? leftSongIndex - 1 : leftDeckSongs.length - 1;
+    setLeftSongIndex(prevIndex);
+    
+    // If playing, pause first, then load new song, then resume
+    if (djState.leftDeck.isPlaying) {
+      togglePlayback('left'); // Pause
+      setTimeout(() => {
+        loadSong(leftDeckSongs[prevIndex], 'left');
+        setTimeout(() => {
+          togglePlayback('left'); // Resume with new song
+        }, 100);
+      }, 50);
+    } else {
+      loadSong(leftDeckSongs[prevIndex], 'left');
+    }
+  };
+
+  const handleLeftNext = () => {
+    const nextIndex = leftSongIndex < leftDeckSongs.length - 1 ? leftSongIndex + 1 : 0;
+    setLeftSongIndex(nextIndex);
+    
+    // If playing, pause first, then load new song, then resume
+    if (djState.leftDeck.isPlaying) {
+      togglePlayback('left'); // Pause
+      setTimeout(() => {
+        loadSong(leftDeckSongs[nextIndex], 'left');
+        setTimeout(() => {
+          togglePlayback('left'); // Resume with new song
+        }, 100);
+      }, 50);
+    } else {
+      loadSong(leftDeckSongs[nextIndex], 'left');
+    }
+  };
+
+  const handleRightPrev = () => {
+    const prevIndex = rightSongIndex > 0 ? rightSongIndex - 1 : rightDeckSongs.length - 1;
+    setRightSongIndex(prevIndex);
+    
+    // If playing, pause first, then load new song, then resume
+    if (djState.rightDeck.isPlaying) {
+      togglePlayback('right'); // Pause
+      setTimeout(() => {
+        loadSong(rightDeckSongs[prevIndex], 'right');
+        setTimeout(() => {
+          togglePlayback('right'); // Resume with new song
+        }, 100);
+      }, 50);
+    } else {
+      loadSong(rightDeckSongs[prevIndex], 'right');
+    }
+  };
+
+  const handleRightNext = () => {
+    const nextIndex = rightSongIndex < rightDeckSongs.length - 1 ? rightSongIndex + 1 : 0;
+    setRightSongIndex(nextIndex);
+    
+    // If playing, pause first, then load new song, then resume
+    if (djState.rightDeck.isPlaying) {
+      togglePlayback('right'); // Pause
+      setTimeout(() => {
+        loadSong(rightDeckSongs[nextIndex], 'right');
+        setTimeout(() => {
+          togglePlayback('right'); // Resume with new song
+        }, 100);
+      }, 50);
+    } else {
+      loadSong(rightDeckSongs[nextIndex], 'right');
+    }
+  };
+
   return (
-    <>
-      {/* Left Deck */}
-      <Deck
-        side="left"
-        djState={djState}
-        songs={leftDeckSongs}
-        onSongSelect={(song) => loadSong(song, 'left')}
-        onTogglePlayback={() => togglePlayback('left')}
-        onVolumeChange={(volume) => setDeckVolume('left', volume)}
-      />
-
-      {/* Right Deck */}
-      <Deck
-        side="right"
-        djState={djState}
-        songs={rightDeckSongs}
-        onSongSelect={(song) => loadSong(song, 'right')}
-        onTogglePlayback={() => togglePlayback('right')}
-        onVolumeChange={(volume) => setDeckVolume('right', volume)}
-      />
-
-      {/* Crossfader Control Panel */}
-      <Crossfader
-        value={djState.crossfaderValue}
-        onChange={setCrossfader}
-        masterVolume={djState.masterVolume}
-        onMasterVolumeChange={setMasterVolume}
-        getFrequencyData={getFrequencyData}
-      />
-    </>
+    <ControlPanel
+      djState={djState}
+      leftDeckSongs={leftDeckSongs}
+      rightDeckSongs={rightDeckSongs}
+      onLeftTogglePlayback={() => togglePlayback('left')}
+      onRightTogglePlayback={() => togglePlayback('right')}
+      onLeftPrev={handleLeftPrev}
+      onLeftNext={handleLeftNext}
+      onRightPrev={handleRightPrev}
+      onRightNext={handleRightNext}
+      crossfaderValue={djState.crossfaderValue}
+      onCrossfaderChange={setCrossfader}
+      masterVolume={djState.masterVolume}
+      onMasterVolumeChange={setMasterVolume}
+      getFrequencyData={getFrequencyData}
+    />
   );
 }

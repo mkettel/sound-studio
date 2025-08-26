@@ -1,0 +1,134 @@
+"use client";
+
+import { useDJEngine, Song } from '@/hooks/useDJEngine';
+import { useState, useEffect } from 'react';
+
+interface DJControlsProps {
+  djState?: any;
+  leftDeckSongs?: Song[];
+  rightDeckSongs?: Song[];
+  onLeftTogglePlayback?: () => void;
+  onRightTogglePlayback?: () => void;
+  onLeftPrev?: () => void;
+  onLeftNext?: () => void;
+  onRightPrev?: () => void;
+  onRightNext?: () => void;
+}
+
+export default function DJControls({ 
+  djState, 
+  leftDeckSongs = [], 
+  rightDeckSongs = [],
+  onLeftTogglePlayback = () => {},
+  onRightTogglePlayback = () => {},
+  onLeftPrev = () => {},
+  onLeftNext = () => {},
+  onRightPrev = () => {},
+  onRightNext = () => {}
+}: DJControlsProps) {
+
+    return (
+        <>
+        {/* Deck Info Section - Above Button Group */}
+        {djState && (
+          <div className="flex justify-between absolute w-full bottom-12 left-0 z-40">
+            {/* Left Deck Info */}
+            <div className="flex items-center p-3 rounded-r-lg">
+              <div className="w-12 h-12 bg-white/10 rounded-md overflow-hidden mr-3">
+                <img src="/song-thumb.png" alt="Song Thumbnail" width={48} height={48}/>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-white text-sm font-medium truncate max-w-32">
+                  {djState.leftDeck.currentSong?.title || 'Song Title'}
+                </div>
+                <div className="text-white/60 text-xs truncate max-w-32">
+                  {djState.leftDeck.currentSong?.artist || 'Artist Name'}
+                </div>
+              </div>
+              {/* Left Deck Controls */}
+              <div className="flex gap-2 ml-4">
+                <button 
+                  onClick={onLeftTogglePlayback} 
+                  className={`${djState.leftDeck.isPlaying ? 'text-red-400' : 'text-green-400'} hover:text-white mr-4 transition-colors`}
+                  disabled={!djState.leftDeck.currentSong || djState.leftDeck.isLoading}
+                >
+                  {djState.leftDeck.isPlaying ? (
+                    <div className="w-3 h-3 flex gap-0.5 items-center">
+                      <div className="bg-current h-3 w-1"></div>
+                      <div className="bg-current h-3 w-1"></div>
+                    </div>
+                  ) : (
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12.5 7.5L0.500001 12.5L1.5 6.5L0.5 0.5L12.5 5.5L12.5 7.5Z" fill="currentColor"/>
+                    </svg>
+                  )}
+                </button>
+                <div className="flex gap-4">
+                    <button onClick={onLeftPrev} className="text-white hover:text-white/70 transition-colors" disabled={djState.leftDeck.isLoading}>
+                        <svg width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4.37114e-07 7.5L12 12.5L11 6.5L12 0.5L6.11959e-07 5.5L4.37114e-07 7.5Z" fill="currentColor"/>
+                    </svg>  
+                    </button>
+                    <button onClick={onLeftNext} className="text-white hover:text-white/70 transition-colors" disabled={djState.leftDeck.isLoading}>
+                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.5 7.5L0.500001 12.5L1.5 6.5L0.5 0.5L12.5 5.5L12.5 7.5Z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Deck Info */}
+            <div className="flex items-center p-3 rounded-l-lg">
+              {/* Right Deck Controls */}
+              <div className="flex gap-2 mr-4">
+                <div className="flex gap-4 mr-4">
+                <button onClick={onRightPrev} className="text-white hover:text-white/70 transition-colors" disabled={djState.rightDeck.isLoading}>
+                  <svg width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4.37114e-07 7.5L12 12.5L11 6.5L12 0.5L6.11959e-07 5.5L4.37114e-07 7.5Z" fill="currentColor"/>
+                  </svg>  
+                </button>
+                <button 
+                  onClick={onRightTogglePlayback} 
+                  className={`${djState.rightDeck.isPlaying ? 'text-red-400' : 'text-green-400'} hover:text-white mr-2 transition-colors`}
+                  disabled={!djState.rightDeck.currentSong || djState.rightDeck.isLoading}
+                >
+                  {djState.rightDeck.isPlaying ? (
+                    <div className="w-3 h-3 flex gap-0.5 items-center">
+                      <div className="bg-current h-3 w-1"></div>
+                      <div className="bg-current h-3 w-1"></div>
+                    </div>
+                  ) : (
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12.5 7.5L0.500001 12.5L1.5 6.5L0.5 0.5L12.5 5.5L12.5 7.5Z" fill="currentColor"/>
+                    </svg>
+                  )}
+                </button>
+                <button onClick={onRightNext} className="text-white hover:text-white/70 transition-colors" disabled={djState.rightDeck.isLoading}>
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12.5 7.5L0.500001 12.5L1.5 6.5L0.5 0.5L12.5 5.5L12.5 7.5Z" fill="currentColor"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-col items-end">
+                <div className="text-white text-sm font-medium truncate max-w-32 text-right">
+                  {djState.rightDeck.currentSong?.title || 'Song Title'}
+                </div>
+                <div className="text-white/60 text-xs truncate max-w-32 text-right">
+                  {djState.rightDeck.currentSong?.artist || 'Artist Name'}
+                </div>
+              </div>
+              <div className="w-12 h-12 bg-white/10 rounded-md overflow-hidden ml-4">
+                <img src="/song-thumb.png" alt="Song Thumbnail" width={48} height={48}/>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Button Group */}
+        
+
+        </>
+    )
+}

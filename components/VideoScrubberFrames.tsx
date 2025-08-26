@@ -398,43 +398,106 @@ export default function VideoScrubberFrames({
       
       {/* Navigation Buttons */}
       {isLoaded && (
-        <div className="absolute  bottom-0 right-0 z-10">
-          <div className="bg-gradient-to-t from-black/80 via-black/60 to-transparent h-0 flex items-end">
-            <div className="w-full flex justify-end pb-2">
-              <div className="flex flex-col gap-1">
-                {availableSegments.map((segment) => (
-                  <button
-                    key={segment.id}
-                    onClick={() => navigateToSegment(segment)}
-                    disabled={isTransitioning}
-                    className={`
-                      relative px-6 py-3 text-md font-bold tracking-widest
-                      transition-all duration-200 ease-out
-                      border backdrop-blur-sm rounded-md
-                      ${activeSegment === segment.id 
-                        ? 'bg-amber-500/30 border-amber-400/80 text-amber-100 shadow-lg shadow-amber-500/20' 
-                        : 'bg-stone-800/40 border-stone-400/60 text-stone-200 hover:bg-stone-700/50 hover:border-stone-300'
-                      }
-                      ${segment.id === 'home' ? 'bg-gray-600/40 border-gray-400/60 hover:bg-gray-500/50' : ''}
-                      uppercase
-                      hover:shadow-lg hover:shadow-white/10
-                      active:scale-95
-                      disabled:opacity-70
-                    `}
-                    style={{
-                      textShadow: '0 1px 3px rgba(0,0,0,0.8)',
-                      fontFamily: 'monospace',
-                      letterSpacing: '0.15em'
-                    }}
-                  >
-                    {segment.id === 'home' && activeSegment !== 'home' ? '← BACK TO HOME' : segment.label}
-                    
-                    {/* LED indicator */}
-                    {activeSegment === segment.id && (
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse shadow-lg shadow-amber-400/50" />
-                    )}
-                  </button>
-                ))}
+        <div className="absolute w-full bottom-0 right-0 z-10">
+          <div className="flex w-full ">
+            <div className="w-full flex">
+              <div className="flex w-full">
+                {/* Left Button - Dynamic based on position */}
+                <button
+                  onClick={() => {
+                    if (activeSegment === 'home') {
+                      navigateToSegment({ id: 'left-record', label: 'LEFT RECORD', frame: 80 });
+                    } else if (activeSegment === 'left-record') {
+                      navigateToSegment({ id: 'right-record', label: 'RIGHT RECORD', frame: 170 });
+                    } else if (activeSegment === 'right-record') {
+                      navigateToSegment({ id: 'left-record', label: 'LEFT RECORD', frame: 80 });
+                    }
+                  }}
+                  disabled={isTransitioning}
+                  className={`
+                    relative px-6 py-3 text-md font-medium
+                    transition-all duration-200 ease-out
+                    border-t backdrop-blur-sm
+                    text-white
+                    ${activeSegment === 'left-record' 
+                      ? 'bg-white/20' 
+                      : ''
+                    }
+                    uppercase
+                    hover:bg-white/20
+                    disabled:opacity-70
+                    w-1/3
+                  `}
+                >
+                  LEFT RECORD
+                  
+                  {/* LED indicator */}
+                  {/* {activeSegment === 'left-record' && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse shadow-lg shadow-amber-400/50" />
+                  )} */}
+                </button>
+
+                {/* Middle Button - Always Wide Shot */}
+                <button
+                  onClick={() => navigateToSegment({ id: 'home', label: 'WIDE SHOT', frame: 1 })}
+                  disabled={isTransitioning}
+                  className={`
+                    relative px-6 py-3 text-md font-medium
+                    transition-all duration-200 ease-out
+                    border-t backdrop-blur-sm
+                    text-white
+                    ${activeSegment === 'home' 
+                      ? 'bg-white/20' 
+                      : ''
+                    }
+                    uppercase
+                    hover:bg-white/20
+                    disabled:opacity-70
+                    w-1/3
+                  `}
+                >
+                  WIDE SHOT
+                  
+                  {/* LED indicator */}
+                  {/* {activeSegment === 'home' && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 z-20 rounded-full animate-pulse shadow-lg shadow-amber-400/50" />
+                  )} */}
+                </button>
+
+                {/* Right Button - Dynamic based on position */}
+                <button
+                  onClick={() => {
+                    if (activeSegment === 'home') {
+                      navigateToSegment({ id: 'right-record', label: 'RIGHT RECORD', frame: 170 });
+                    } else if (activeSegment === 'left-record') {
+                      navigateToSegment({ id: 'right-record', label: 'RIGHT RECORD', frame: 170 });
+                    } else if (activeSegment === 'right-record') {
+                      navigateToSegment({ id: 'left-record', label: 'LEFT RECORD', frame: 80 });
+                    }
+                  }}
+                  disabled={isTransitioning}
+                  className={`
+                    relative px-6 py-3 text-md font-medium
+                    transition-all duration-200 ease-out
+                    text-white
+                    border-t backdrop-blur-sm
+                    ${activeSegment === 'right-record' 
+                      ? 'bg-white/20' 
+                      : ''
+                    }
+                    uppercase
+                    hover:bg-white/20
+                    disabled:opacity-70
+                    w-1/3
+                  `}
+                >
+                  RIGHT RECORD
+                  
+                  {/* LED indicator */}
+                  {/* {activeSegment === 'right-record' && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse shadow-lg shadow-amber-400/50" />
+                  )} */}
+                </button>
               </div>
             </div>
           </div>
