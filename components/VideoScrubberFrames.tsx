@@ -407,11 +407,10 @@ export default function VideoScrubberFrames({
                   onClick={() => {
                     if (activeSegment === 'home') {
                       navigateToSegment({ id: 'left-record', label: 'LEFT RECORD', frame: 79 });
-                    } else if (activeSegment === 'left-record') {
-                      navigateToSegment({ id: 'right-record', label: 'RIGHT RECORD', frame: 189 });
                     } else if (activeSegment === 'right-record') {
                       navigateToSegment({ id: 'left-record', label: 'LEFT RECORD', frame: 79 });
                     }
+                    // Don't do anything if already at left-record
                   }}
                   disabled={isTransitioning}
                   className={`
@@ -471,9 +470,8 @@ export default function VideoScrubberFrames({
                       navigateToSegment({ id: 'right-record', label: 'RIGHT RECORD', frame: 189 });
                     } else if (activeSegment === 'left-record') {
                       navigateToSegment({ id: 'right-record', label: 'RIGHT RECORD', frame: 189 });
-                    } else if (activeSegment === 'right-record') {
-                      navigateToSegment({ id: 'left-record', label: 'LEFT RECORD', frame: 79 });
                     }
+                    // Don't do anything if already at right-record
                   }}
                   disabled={isTransitioning}
                   className={`
