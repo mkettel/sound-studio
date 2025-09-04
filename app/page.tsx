@@ -11,6 +11,8 @@ export default function Home() {
     djState,
     loadSong,
     togglePlayback,
+    nextSong,
+    previousSong,
     setCrossfader,
     setDeckVolume,
     setMasterVolume,
@@ -61,10 +63,6 @@ export default function Home() {
     }
   ];
 
-  // Track current song indices
-  const [leftSongIndex, setLeftSongIndex] = useState(0);
-  const [rightSongIndex, setRightSongIndex] = useState(0);
-
   // Auto-load first songs on mount - using useEffect with empty dependency array
   useEffect(() => {
     if (leftDeckSongs.length > 0) {
@@ -75,77 +73,21 @@ export default function Home() {
     }
   }, []); // Empty dependency array - only run once on mount
 
-  // Navigation functions that force immediate switching
+  // Navigation functions using the new DJ engine functions
   const handleLeftPrev = () => {
-    const prevIndex = leftSongIndex > 0 ? leftSongIndex - 1 : leftDeckSongs.length - 1;
-    setLeftSongIndex(prevIndex);
-    
-    // If playing, pause first, then load new song, then resume
-    if (djState.leftDeck.isPlaying) {
-      togglePlayback('left'); // Pause
-      setTimeout(() => {
-        loadSong(leftDeckSongs[prevIndex], 'left');
-        setTimeout(() => {
-          togglePlayback('left'); // Resume with new song
-        }, 100);
-      }, 50);
-    } else {
-      loadSong(leftDeckSongs[prevIndex], 'left');
-    }
+    previousSong('left', leftDeckSongs);
   };
 
   const handleLeftNext = () => {
-    const nextIndex = leftSongIndex < leftDeckSongs.length - 1 ? leftSongIndex + 1 : 0;
-    setLeftSongIndex(nextIndex);
-    
-    // If playing, pause first, then load new song, then resume
-    if (djState.leftDeck.isPlaying) {
-      togglePlayback('left'); // Pause
-      setTimeout(() => {
-        loadSong(leftDeckSongs[nextIndex], 'left');
-        setTimeout(() => {
-          togglePlayback('left'); // Resume with new song
-        }, 100);
-      }, 50);
-    } else {
-      loadSong(leftDeckSongs[nextIndex], 'left');
-    }
+    nextSong('left', leftDeckSongs);
   };
 
   const handleRightPrev = () => {
-    const prevIndex = rightSongIndex > 0 ? rightSongIndex - 1 : rightDeckSongs.length - 1;
-    setRightSongIndex(prevIndex);
-    
-    // If playing, pause first, then load new song, then resume
-    if (djState.rightDeck.isPlaying) {
-      togglePlayback('right'); // Pause
-      setTimeout(() => {
-        loadSong(rightDeckSongs[prevIndex], 'right');
-        setTimeout(() => {
-          togglePlayback('right'); // Resume with new song
-        }, 100);
-      }, 50);
-    } else {
-      loadSong(rightDeckSongs[prevIndex], 'right');
-    }
+    previousSong('right', rightDeckSongs);
   };
 
   const handleRightNext = () => {
-    const nextIndex = rightSongIndex < rightDeckSongs.length - 1 ? rightSongIndex + 1 : 0;
-    setRightSongIndex(nextIndex);
-    
-    // If playing, pause first, then load new song, then resume
-    if (djState.rightDeck.isPlaying) {
-      togglePlayback('right'); // Pause
-      setTimeout(() => {
-        loadSong(rightDeckSongs[nextIndex], 'right');
-        setTimeout(() => {
-          togglePlayback('right'); // Resume with new song
-        }, 100);
-      }, 50);
-    } else {
-      loadSong(rightDeckSongs[nextIndex], 'right');
-    }
+    nextSong('right', rightDeckSongs);
   };
 
   return (

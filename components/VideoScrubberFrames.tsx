@@ -419,7 +419,7 @@ export default function VideoScrubberFrames({
                     border-t backdrop-blur-sm
                     text-white
                     ${activeSegment === 'left-record' 
-                      ? 'bg-white/20' 
+                      ? 'bg-white/30' 
                       : ''
                     }
                     uppercase

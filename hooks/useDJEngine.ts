@@ -434,10 +434,224 @@ export const useDJEngine = () => {
     };
   }, [djState.isInitialized, initializeAudioContext]);
 
+  // Navigate to next song in queue (maintaining playback state)
+  const nextSong = useCallback(async (deck: DeckSide, playlist: Song[]) => {
+    if (!audioContextRef.current) {
+      await initializeAudioContext();
+    }
+
+    const deckState = deck === 'left' ? djState.leftDeck : djState.rightDeck;
+    const currentSong = deckState.currentSong;
+    
+    if (!currentSong || playlist.length === 0) return;
+    
+    // Find current song index in playlist
+    const currentIndex = playlist.findIndex(song => song.id === currentSong.id);
+    if (currentIndex === -1) return;
+    
+    // Get next song (loop to beginning if at end)
+    const nextIndex = (currentIndex + 1) % playlist.length;
+    const nextSongToPlay = playlist[nextIndex];
+    
+    // Remember if we were playing
+    const wasPlaying = deckState.isPlaying;
+    
+    // Stop current playback if playing
+    if (wasPlaying) {
+      const sourceRef = deck === 'left' ? leftSourceRef : rightSourceRef;
+      if (sourceRef.current) {
+        sourceRef.current.stop();
+        sourceRef.current = null;
+      }
+      // Reset offset for new song
+      const offsetRef = deck === 'left' ? leftOffsetRef : rightOffsetRef;
+      offsetRef.current = 0;
+    }
+
+    // Load the next song directly
+    try {
+      setDJState(prev => ({
+        ...prev,
+        [deck + 'Deck']: { 
+          ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
+          isLoading: true 
+        }
+      }));
+
+      const response = await fetch(nextSongToPlay.url);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
+      
+      const songWithBuffer = { ...nextSongToPlay, buffer: audioBuffer, duration: audioBuffer.duration };
+
+      // Update state with new song
+      setDJState(prev => ({
+        ...prev,
+        [deck + 'Deck']: {
+          ...(deck === 'left' ? prev.leftDeck : prev.rightDeck),
+          currentSong: songWithBuffer,
+          isLoading: false,
+          position: 0,
+          isPlaying: wasPlaying, // Maintain playing state
+        }
+      }));
+
+      // If we were playing, start the new song immediately
+      if (wasPlaying) {
+        const sourceRef = deck === 'left' ? leftSourceRef : rightSourceRef;
+        const gainNode = deck === 'left' ? leftDeckGainRef.current : rightDeckGainRef.current;
+        const startTimeRef = deck === 'left' ? leftStartTimeRef : rightStartTimeRef;
+
+        if (gainNode) {
+          const source = audioContextRef.current!.createBufferSource();
+          source.buffer = audioBuffer;
+          source.connect(gainNode);
+          
+          startTimeRef.current = audioContextRef.current!.currentTime;
+          source.start(0, 0);
+          sourceRef.current = source;
+
+          // Handle song end
+          source.onended = () => {
+            if (sourceRef.current === source) {
+              setDJState(prev => ({
+                ...prev,
+                [deck + 'Deck']: { 
+                  ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
+                  isPlaying: false 
+                }
+              }));
+              sourceRef.current = null;
+            }
+          };
+        }
+      }
+
+      console.log(`Advanced to next song "${nextSongToPlay.title}" on ${deck} deck`);
+    } catch (error) {
+      console.error(`Failed to load next song "${nextSongToPlay.title}":`, error);
+      setDJState(prev => ({
+        ...prev,
+        [deck + 'Deck']: { 
+          ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
+          isLoading: false 
+        }
+      }));
+    }
+  }, [djState, initializeAudioContext]);
+
+  // Navigate to previous song in queue (maintaining playback state)
+  const previousSong = useCallback(async (deck: DeckSide, playlist: Song[]) => {
+    if (!audioContextRef.current) {
+      await initializeAudioContext();
+    }
+
+    const deckState = deck === 'left' ? djState.leftDeck : djState.rightDeck;
+    const currentSong = deckState.currentSong;
+    
+    if (!currentSong || playlist.length === 0) return;
+    
+    // Find current song index in playlist
+    const currentIndex = playlist.findIndex(song => song.id === currentSong.id);
+    if (currentIndex === -1) return;
+    
+    // Get previous song (loop to end if at beginning)
+    const prevIndex = currentIndex === 0 ? playlist.length - 1 : currentIndex - 1;
+    const prevSongToPlay = playlist[prevIndex];
+    
+    // Remember if we were playing
+    const wasPlaying = deckState.isPlaying;
+    
+    // Stop current playback if playing
+    if (wasPlaying) {
+      const sourceRef = deck === 'left' ? leftSourceRef : rightSourceRef;
+      if (sourceRef.current) {
+        sourceRef.current.stop();
+        sourceRef.current = null;
+      }
+      // Reset offset for new song
+      const offsetRef = deck === 'left' ? leftOffsetRef : rightOffsetRef;
+      offsetRef.current = 0;
+    }
+
+    // Load the previous song directly
+    try {
+      setDJState(prev => ({
+        ...prev,
+        [deck + 'Deck']: { 
+          ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
+          isLoading: true 
+        }
+      }));
+
+      const response = await fetch(prevSongToPlay.url);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
+      
+      const songWithBuffer = { ...prevSongToPlay, buffer: audioBuffer, duration: audioBuffer.duration };
+
+      // Update state with new song
+      setDJState(prev => ({
+        ...prev,
+        [deck + 'Deck']: {
+          ...(deck === 'left' ? prev.leftDeck : prev.rightDeck),
+          currentSong: songWithBuffer,
+          isLoading: false,
+          position: 0,
+          isPlaying: wasPlaying, // Maintain playing state
+        }
+      }));
+
+      // If we were playing, start the new song immediately
+      if (wasPlaying) {
+        const sourceRef = deck === 'left' ? leftSourceRef : rightSourceRef;
+        const gainNode = deck === 'left' ? leftDeckGainRef.current : rightDeckGainRef.current;
+        const startTimeRef = deck === 'left' ? leftStartTimeRef : rightStartTimeRef;
+
+        if (gainNode) {
+          const source = audioContextRef.current!.createBufferSource();
+          source.buffer = audioBuffer;
+          source.connect(gainNode);
+          
+          startTimeRef.current = audioContextRef.current!.currentTime;
+          source.start(0, 0);
+          sourceRef.current = source;
+
+          // Handle song end
+          source.onended = () => {
+            if (sourceRef.current === source) {
+              setDJState(prev => ({
+                ...prev,
+                [deck + 'Deck']: { 
+                  ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
+                  isPlaying: false 
+                }
+              }));
+              sourceRef.current = null;
+            }
+          };
+        }
+      }
+
+      console.log(`Advanced to previous song "${prevSongToPlay.title}" on ${deck} deck`);
+    } catch (error) {
+      console.error(`Failed to load previous song "${prevSongToPlay.title}":`, error);
+      setDJState(prev => ({
+        ...prev,
+        [deck + 'Deck']: { 
+          ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
+          isLoading: false 
+        }
+      }));
+    }
+  }, [djState, initializeAudioContext]);
+
   return {
     djState,
     loadSong,
     togglePlayback,
+    nextSong,
+    previousSong,
     setCrossfader,
     setDeckVolume,
     setMasterVolume,

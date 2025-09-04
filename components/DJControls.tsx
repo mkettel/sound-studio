@@ -2,6 +2,7 @@
 
 import { useDJEngine, Song } from '@/hooks/useDJEngine';
 import { useState, useEffect } from 'react';
+import QueuePanel from './QueuePanel';
 
 interface DJControlsProps {
   djState?: any;
@@ -30,12 +31,14 @@ export default function DJControls({
   crossfaderValue = 0,
   onCrossfaderChange = () => {}
 }: DJControlsProps) {
+  const [leftQueueExpanded, setLeftQueueExpanded] = useState(false);
+  const [rightQueueExpanded, setRightQueueExpanded] = useState(false);
 
     return (
         <>
         {/* Deck Info Section - Above Button Group */}
         {djState && (
-          <div className="flex justify-between absolute w-full bottom-12 left-0 z-40">
+          <div className="flex hidden justify-between absolute w-full bottom-12 left-0 z-40">
             {/* Left Deck Info */}
             <div className="flex items-center p-3 rounded-r-lg">
               <div className="w-12 h-12 bg-white/10 rounded-md overflow-hidden mr-3">
@@ -83,9 +86,9 @@ export default function DJControls({
             </div>
 
             {/* Right Deck Info */}
-            <div className="flex items-center p-3 rounded-l-lg">
+            <div className="flex items-center border-black border-2 p-3 rounded-l-lg">
               {/* Right Deck Controls */}
-              <div className="flex gap-2 mr-4">
+              <div className="flex gap-2 mr-4 ">
                 <div className="flex gap-4 mr-4">
                 <button onClick={onRightPrev} className="text-white hover:text-white/70 transition-colors" disabled={djState.rightDeck.isLoading}>
                   <svg width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -131,7 +134,7 @@ export default function DJControls({
         )}
         
         {/* Crossfader - Same level as song controls but centered */}
-        <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-40">
+        <div className="fixed bottom-12 hidden left-1/2 transform -translate-x-1/2 z-40">
           <div className=" px-6 py-4">
             <div className="flex items-center space-x-6">
               <div className="text-white text-sm font-mono">L</div>
@@ -155,8 +158,37 @@ export default function DJControls({
           </div>
         </div>
 
-        {/* Button Group */}
-        
+        {/* Left Queue Panel */}
+        <QueuePanel
+          title="PLAY QUEUE"
+          position="left"
+          isExpanded={leftQueueExpanded}
+          currentSong={djState?.leftDeck.currentSong}
+          queueSongs={leftDeckSongs}
+          isPlaying={djState?.leftDeck.isPlaying}
+          isLoading={djState?.leftDeck.isLoading}
+          onToggleExpanded={() => setLeftQueueExpanded(!leftQueueExpanded)}
+          onRemoveSong={(songId) => console.log('Remove left song:', songId)}
+          onTogglePlayback={onLeftTogglePlayback}
+          onPrevious={onLeftPrev}
+          onNext={onLeftNext}
+        />
+
+        {/* Right Queue Panel */}
+        <QueuePanel
+          title="PLAY QUEUE"
+          position="right"
+          isExpanded={rightQueueExpanded}
+          currentSong={djState?.rightDeck.currentSong}
+          queueSongs={rightDeckSongs}
+          isPlaying={djState?.rightDeck.isPlaying}
+          isLoading={djState?.rightDeck.isLoading}
+          onToggleExpanded={() => setRightQueueExpanded(!rightQueueExpanded)}
+          onRemoveSong={(songId) => console.log('Remove right song:', songId)}
+          onTogglePlayback={onRightTogglePlayback}
+          onPrevious={onRightPrev}
+          onNext={onRightNext}
+        />
 
         </>
     )
