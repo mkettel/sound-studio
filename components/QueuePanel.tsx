@@ -122,7 +122,7 @@ export default function   QueuePanel({
           className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors"
           onClick={onToggleExpanded}
         >
-          <div className="text-white text-sm font-medium uppercase tracking-wider">
+          <div className="text-white text-sm font-medium uppercase tracking-tight">
             {title}
           </div>
           <button className="text-white/60 hover:text-white transition-colors">
@@ -236,12 +236,12 @@ export default function   QueuePanel({
           className="overflow-hidden"
         >
           <div className="px-4 py-2">
-            <div className="text-white/60 text-xs uppercase tracking-wider mb-2">
+            <div className="text-white/60 text-xs uppercase tracking-tight mb-2">
               NEXT UP
             </div>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {queueSongs.filter(song => song.id !== currentSong?.id).slice(0, 4).map((song, index) => (
-                <div key={song.id} className="flex items-center gap-3 p-2 rounded hover:bg-white/5 transition-colors">
+                <div key={song.id} className="flex items-center gap-3 p-2 pr-0 cursor-pointer rounded hover:bg-white/5 transition-colors">
                   <div className="w-8 h-8 bg-white/10 rounded overflow-hidden flex-shrink-0">
                     <img src="/song-thumb.png" alt="Album art" className="w-full h-full object-cover" />
                   </div>
