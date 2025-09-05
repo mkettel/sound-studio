@@ -184,17 +184,18 @@ export default function VideoScrubberFrames({
       tlRef.current.kill();
     }
 
-    // Create infinite loop animation
+    // Create infinite ping-pong loop animation
     tlRef.current = gsap.timeline({
       repeat: -1, // Infinite loop
+      yoyo: true, // Reverse on each repeat (ping-pong effect)
       onUpdate: render,
-      onStart: () => console.log(`✅ Loop animation started for ${position}`),
-      onRepeat: () => console.log(`🔁 Loop repeating for ${position}`)
+      onStart: () => console.log(`✅ Ping-pong loop animation started for ${position}`),
+      onRepeat: () => console.log(`🔁 Loop ping-ponging for ${position}`)
     });
 
-    // Cycle through loop frames smoothly
-    const duration = loopFrames.length * 0.1; // Slower, more subtle
-    console.log(`⏱️ Loop duration: ${duration}s for ${loopFrames.length} frames`);
+    // Cycle through loop frames smoothly (ping-pong doubles effective frame count)
+    const duration = loopFrames.length * 0.08; // Faster since we're ping-ponging
+    console.log(`⏱️ Ping-pong duration: ${duration}s for ${loopFrames.length} frames (${loopFrames.length * 2} effective frames)`);
     
     tlRef.current.to(frameController.current, {
       frame: loopFrames[loopFrames.length - 1],
