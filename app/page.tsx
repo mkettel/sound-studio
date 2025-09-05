@@ -24,7 +24,7 @@ export default function Home() {
     {
       id: 'L1',
       title: 'Cinematic Hip Hop Vlog Music',
-      artist: 'Unknown Artist',
+      artist: 'Rocky Slade',
       url: '/audio/Cinematic Hip Hop Vlog Music.mp3'
     },
     {
@@ -46,7 +46,7 @@ export default function Home() {
     {
       id: 'R1', 
       title: 'Tell Me What',
-      artist: 'Unknown Artist',
+      artist: 'Timber Cat',
       url: '/audio/Tell Me What.mp3'
     },
     {
