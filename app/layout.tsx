@@ -1,5 +1,12 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import localFont from "next/font/local";
+
+// Satoshi Local Font
+const Satoshi = localFont({
+  src: '../fonts/Fonts/TTF/Satoshi-Variable.ttf',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'AUW Sound Studio Demo',
@@ -13,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={Satoshi.className}>{children}</body>
     </html>
   )
 }

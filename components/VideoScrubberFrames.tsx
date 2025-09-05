@@ -420,11 +420,11 @@ export default function VideoScrubberFrames({
                     border-t backdrop-blur-sm
                     text-white
                     ${activeSegment === 'left-record' 
-                      ? 'bg-white/30' 
-                      : ''
+                      ? 'bg-black/20' 
+                      : 'bg-black/30'
                     }
                     uppercase
-                    hover:bg-white/20
+                    hover:bg-black/20
                     disabled:opacity-70
                     w-1/3
                   `}
@@ -447,11 +447,11 @@ export default function VideoScrubberFrames({
                     border-t backdrop-blur-sm
                     text-white
                     ${activeSegment === 'home' 
-                      ? 'bg-white/20' 
-                      : ''
+                      ? 'bg-black/20' 
+                      : 'bg-black/30'
                     }
                     uppercase
-                    hover:bg-white/20
+                    hover:bg-black/20
                     disabled:opacity-70
                     w-1/3
                   `}
@@ -481,11 +481,11 @@ export default function VideoScrubberFrames({
                     text-white
                     border-t backdrop-blur-sm
                     ${activeSegment === 'right-record' 
-                      ? 'bg-white/20' 
-                      : ''
+                      ? 'bg-black/20' 
+                      : 'bg-black/30'
                     }
                     uppercase
-                    hover:bg-white/20
+                    hover:bg-black/20
                     disabled:opacity-70
                     w-1/3
                   `}

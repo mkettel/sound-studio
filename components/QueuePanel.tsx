@@ -19,7 +19,7 @@ interface QueuePanelProps {
   onNext?: () => void;
 }
 
-export default function QueuePanel({
+export default function   QueuePanel({
   title,
   position,
   isExpanded = false,
@@ -116,7 +116,7 @@ export default function QueuePanel({
 
   return (
     <div className={`fixed top-6 ${position === 'left' ? 'left-6' : 'right-6'} z-40 max-w-72 min-w-72`}>
-      <div className="bg-black/30 backdrop-blur-sm border border-white/90 rounded-sm overflow-hidden">
+      <div className="bg-black/30 backdrop-blur-sm border border-white/90 overflow-hidden">
         {/* Header with toggle */}
         <div 
           className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors"
