@@ -415,7 +415,7 @@ export default function VideoScrubberFrames({
                   }}
                   disabled={isTransitioning}
                   className={`
-                    relative px-6 py-3 text-md font-medium
+                    relative px-6 py-3 text-sm font-medium
                     transition-all duration-200 ease-out
                     border-t backdrop-blur-sm
                     text-white
@@ -442,7 +442,7 @@ export default function VideoScrubberFrames({
                   onClick={() => navigateToSegment({ id: 'home', label: 'WIDE SHOT', frame: 0 })}
                   disabled={isTransitioning}
                   className={`
-                    relative px-6 py-3 text-md font-medium
+                    relative px-6 py-3 text-sm font-medium
                     transition-all duration-200 ease-out
                     border-t backdrop-blur-sm
                     text-white
@@ -476,7 +476,7 @@ export default function VideoScrubberFrames({
                   }}
                   disabled={isTransitioning}
                   className={`
-                    relative px-6 py-3 text-md font-medium
+                    relative px-6 py-3 text-sm font-medium
                     transition-all duration-200 ease-out
                     text-white
                     border-t backdrop-blur-sm
