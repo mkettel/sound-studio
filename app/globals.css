@@ -10,18 +10,18 @@
 /* Rotated slider for vertical effect */
 input[type="range"].transform.-rotate-90 {
   width: 64px; /* Match h-16 */
-  height: 12px;
+  height: 10px;
 }
 
 /* Custom range slider styles for DJ controls */
 input[type="range"] {
   -webkit-appearance: none;
-  background: transparent;
+  
 }
 
 input[type="range"]::-webkit-slider-track {
-  background: rgba(209, 213, 219, 0.2);
-  height: 4px;
+  background: rgba(209, 213, 219, 0.9);
+  height: 2px;
   border-radius: 2px;
 }
 
@@ -58,3 +58,4 @@ input[type="range"]::-moz-range-thumb {
   border: 2px solid rgba(229, 231, 235, 1);
   box-shadow: 0 0 8px rgba(209, 213, 219, 0.3);
 }
+

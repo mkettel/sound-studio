@@ -4,6 +4,7 @@ import VideoScrubberFrames from "@/components/VideoScrubberFrames";
 import DJBoard from "@/components/DJBoard";
 import DJControls from "@/components/DJControls";
 import MasterVolume from "@/components/MasterVolume";
+import Crossfader from "@/components/Crossfader";
 import { useDJEngine, Song } from '@/hooks/useDJEngine';
 import { useState, useEffect } from 'react';
 
@@ -98,12 +99,21 @@ export default function Home() {
         <VideoScrubberFrames />
       </div>
 
-      {/* Master Volume Control - Above all other controls */}
-      <div className="fixed bottom-14 left-1/2 transform -translate-x-1/2 z-50">
+      {/* Crossfader - Center position */}
+      <div className="fixed bottom-16 left-1/2 transform -translate-x-1/2 z-50">
+        <Crossfader 
+          value={djState.crossfaderValue}
+          onValueChange={setCrossfader}
+          className=""
+        />
+      </div>
+
+      {/* Master Volume Control - Right side */}
+      <div className="fixed hidden bottom-14 right-8 z-50">
         <MasterVolume 
           volume={djState.masterVolume}
           onVolumeChange={setMasterVolume}
-          className="backdrop-blur-sm"
+          className=""
         />
       </div>
 
