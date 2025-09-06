@@ -3,6 +3,7 @@
 import VideoScrubberFrames from "@/components/VideoScrubberFrames";
 import DJBoard from "@/components/DJBoard";
 import DJControls from "@/components/DJControls";
+import MasterVolume from "@/components/MasterVolume";
 import { useDJEngine, Song } from '@/hooks/useDJEngine';
 import { useState, useEffect } from 'react';
 
@@ -95,6 +96,15 @@ export default function Home() {
       {/* Fullscreen video background */}
       <div className="fixed inset-0 w-full h-full">
         <VideoScrubberFrames />
+      </div>
+
+      {/* Master Volume Control - Above all other controls */}
+      <div className="fixed bottom-14 left-1/2 transform -translate-x-1/2 z-50">
+        <MasterVolume 
+          volume={djState.masterVolume}
+          onVolumeChange={setMasterVolume}
+          className="backdrop-blur-sm"
+        />
       </div>
 
       {/* DJ Interface - Always Present, Collapsible */}
