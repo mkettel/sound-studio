@@ -402,7 +402,7 @@ export default function VideoScrubberFrames({
         <div className="absolute w-full bottom-0 right-0 z-10">
           <div className="flex w-full ">
             <div className="w-full flex">
-              <div className="flex w-full">
+              <div className="flex w-full m-2">
                 {/* Left Button - Dynamic based on position */}
                 <button
                   onClick={() => {
@@ -417,7 +417,7 @@ export default function VideoScrubberFrames({
                   className={`
                     relative px-6 py-3 text-sm font-medium
                     transition-all duration-200 ease-out
-                    border-t backdrop-blur-sm
+                    border backdrop-blur-sm
                     text-white
                     ${activeSegment === 'left-record' 
                       ? 'bg-black/20' 
@@ -444,7 +444,7 @@ export default function VideoScrubberFrames({
                   className={`
                     relative px-6 py-3 text-sm font-medium
                     transition-all duration-200 ease-out
-                    border-t backdrop-blur-sm
+                    border backdrop-blur-sm
                     text-white
                     ${activeSegment === 'home' 
                       ? 'bg-black/20' 
@@ -479,7 +479,7 @@ export default function VideoScrubberFrames({
                     relative px-6 py-3 text-sm font-medium
                     transition-all duration-200 ease-out
                     text-white
-                    border-t backdrop-blur-sm
+                    border backdrop-blur-sm
                     ${activeSegment === 'right-record' 
                       ? 'bg-black/20' 
                       : 'bg-black/30'
