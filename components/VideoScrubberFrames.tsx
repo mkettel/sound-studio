@@ -443,7 +443,7 @@ export default function VideoScrubberFrames({
                   disabled={isTransitioning}
                   className={`
                     relative px-6 py-3 text-sm font-medium
-                    transition-all duration-200 ease-out
+                    transition-all ml-2 duration-200 ease-out
                     border backdrop-blur-sm
                     text-white
                     ${activeSegment === 'home' 
@@ -477,7 +477,7 @@ export default function VideoScrubberFrames({
                   disabled={isTransitioning}
                   className={`
                     relative px-6 py-3 text-sm font-medium
-                    transition-all duration-200 ease-out
+                    transition-all ml-2 duration-200 ease-out
                     text-white
                     border backdrop-blur-sm
                     ${activeSegment === 'right-record' 
