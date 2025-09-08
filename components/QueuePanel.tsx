@@ -201,7 +201,7 @@ export default function   QueuePanel({
 
         {/* Playback Controls + Waveform - Always Visible */}
         <div className="px-4 py-3 border-b border-white/10">
-          <div className="flex items-center justify-between gap-6">
+          <div className="flex items-center cursor-pointer justify-between gap-6">
             {/* Controls */}
             <div className="flex items-center gap-4">
               <button
