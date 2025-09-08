@@ -149,7 +149,7 @@ export default function   QueuePanel({
                 PLAYING NOW
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded overflow-hidden flex-shrink-0">
+                <div className="w-10 h-10 bg-white/10 overflow-hidden flex-shrink-0">
                   <img src="/song-thumb.png" alt="Album art" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -204,8 +204,8 @@ export default function   QueuePanel({
             >
               {isPlaying ? (
                 <div className="w-4 h-4 flex gap-1 items-center">
-                  <div className="bg-current h-4 w-1.5 rounded-sm"></div>
-                  <div className="bg-current h-4 w-1.5 rounded-sm"></div>
+                  <div className="bg-current h-4 w-1.5"></div>
+                  <div className="bg-current h-4 w-1.5"></div>
                 </div>
               ) : (
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -241,8 +241,8 @@ export default function   QueuePanel({
             </div>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {queueSongs.filter(song => song.id !== currentSong?.id).slice(0, 4).map((song, index) => (
-                <div key={song.id} className="flex items-center gap-3 p-2 pr-0 cursor-pointer rounded hover:bg-white/5 transition-colors">
-                  <div className="w-8 h-8 bg-white/10 rounded overflow-hidden flex-shrink-0">
+                <div key={song.id} className="flex items-center gap-3 p-2 pr-0 cursor-pointer hover:bg-white/5 transition-colors">
+                  <div className="w-8 h-8 bg-white/10 overflow-hidden flex-shrink-0">
                     <img src="/song-thumb.png" alt="Album art" className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">

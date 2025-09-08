@@ -40,6 +40,18 @@ export default function Home() {
       title: 'Stargazer',
       artist: 'Alien I Trust (125 BPM)',
       url: '/audio/Stargazer by Alien I Trust 125 BPM.wav'
+    },  
+    {
+      id: 'L4',
+      title: 'Stargazer',
+      artist: 'Alien I Trust (125 BPM)',
+      url: '/audio/Stargazer by Alien I Trust 125 BPM.wav'
+    },
+    {
+      id: 'L5',
+      title: 'Stargazer',
+      artist: 'Alien I Trust (125 BPM)',
+      url: '/audio/Stargazer by Alien I Trust 125 BPM.wav'
     }
   ];
 
