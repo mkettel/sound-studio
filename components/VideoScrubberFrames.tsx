@@ -52,27 +52,27 @@ export default function VideoScrubberFrames({
   const frameController = useRef({ frame: 0 });
   const tlRef = useRef<gsap.core.Timeline | null>(null);
 
-  // Generate frame path using optimized JPG frames with original sequence numbers
+  // Generate frame path using ultra-high quality frames with -q:v 3 compression
   const getFramePath = (index: number): string => {
     const frameNumber = index.toString().padStart(5, '0');
     
-    // All frames now use higher quality optimized JPG versions
+    // Use ultra-quality frames for better visual quality
     if (index >= 0 && index <= 29) {
-      return `/frames-new-optimized/AUW Listening Experience - loop wide Test 1/AUW Listening Experience - loop wide lq_${frameNumber}.jpg`;
+      return `/frames-ultra-quality/AUW Web Sequence wide loop Test 1/AUW Web Sequence wide loop Test 1_${frameNumber}.jpg`;
     } else if (index >= 30 && index <= 78) {
-      return `/frames-new-optimized/AUW Listening Experience - wide to left Test 1/AUW Listening Experience - wide to left lq_${frameNumber}.jpg`;
+      return `/frames-ultra-quality/AUW Web Sequence transition wide to left Test 1/AUW Web Sequence transition wide to left Test 1_${frameNumber}.jpg`;
     } else if (index >= 79 && index <= 118) {
-      return `/frames-new-optimized/AUW Listening Experience - loop left Test 1/AUW Listening Experience - loop left lq_${frameNumber}.jpg`;
+      return `/frames-ultra-quality/AUW Web Sequence loop left Test 1/AUW Web Sequence loop left Test 1_${frameNumber}.jpg`;
     } else if (index >= 119 && index <= 188) {
-      return `/frames-new-optimized/AUW Listening Experience - left to right Test 1/AUW Listening Experience - left to right lq_${frameNumber}.jpg`;
+      return `/frames-ultra-quality/AUW Web Sequence transition left right Test 1/AUW Web Sequence transition left right Test 1_${frameNumber}.jpg`;
     } else if (index >= 189 && index <= 228) {
-      return `/frames-new-optimized/AUW Listening Experience - loop right Test 1/AUW Listening Experience - loop right lq_${frameNumber}.jpg`;
+      return `/frames-ultra-quality/AUW Web Sequence loop right Test 1/AUW Web Sequence loop right Test 1_${frameNumber}.jpg`;
     } else if (index >= 229 && index <= 278) {
-      return `/frames-new-optimized/AUW Listening Experience - right to wide Test 1/AUW Listening Experience - right to wide lq_${frameNumber}.jpg`;
+      return `/frames-ultra-quality/AUW Web Sequence Transition right to wide Test 1/AUW Web Sequence Transition right to wide Test 1_${frameNumber}.jpg`;
     }
     
     // Fallback to first frame
-    return `/frames-new-optimized/AUW Listening Experience - loop wide Test 1/AUW Listening Experience - loop wide lq_00000.jpg`;
+    return `/frames-ultra-quality/AUW Web Sequence wide loop Test 1/AUW Web Sequence wide loop Test 1_00000.jpg`;
   };
 
   // Render function (back to simple scaling)
