@@ -413,6 +413,82 @@ export const useDJEngine = () => {
     return dataArray;
   }, []);
 
+  // Seek within current song (seconds)
+  const seekDeck = useCallback(async (deck: DeckSide, seconds: number) => {
+    if (!audioContextRef.current) {
+      await initializeAudioContext();
+    }
+
+    const deckState = deck === 'left' ? djState.leftDeck : djState.rightDeck;
+    const sourceRef = deck === 'left' ? leftSourceRef : rightSourceRef;
+    const gainNode = deck === 'left' ? leftDeckGainRef.current : rightDeckGainRef.current;
+    const startTimeRef = deck === 'left' ? leftStartTimeRef : rightStartTimeRef;
+    const offsetRef = deck === 'left' ? leftOffsetRef : rightOffsetRef;
+
+    const song = deckState.currentSong;
+    if (!song?.buffer || !gainNode) return;
+
+    const duration = song.duration || song.buffer.duration;
+    const target = Math.max(0, Math.min(seconds, Math.max(0, duration - 0.01)));
+    const wasPlaying = deckState.isPlaying;
+
+    // Stop current source if any
+    if (sourceRef.current) {
+      try { sourceRef.current.stop(); } catch {}
+      sourceRef.current = null;
+    }
+
+    // Set new offset
+    offsetRef.current = target;
+
+    if (wasPlaying) {
+      // Start new source at target offset
+      const source = audioContextRef.current!.createBufferSource();
+      source.buffer = song.buffer;
+      source.connect(gainNode);
+      startTimeRef.current = audioContextRef.current!.currentTime;
+      source.start(0, target);
+      sourceRef.current = source;
+
+      source.onended = () => {
+        if (sourceRef.current === source) {
+          setDJState(prev => ({
+            ...prev,
+            [deck + 'Deck']: { 
+              ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
+              isPlaying: false 
+            }
+          }));
+          sourceRef.current = null;
+          offsetRef.current = 0;
+        }
+      };
+    }
+
+    // Update position in state (keep isPlaying the same)
+    setDJState(prev => ({
+      ...prev,
+      [deck + 'Deck']: {
+        ...(deck === 'left' ? prev.leftDeck : prev.rightDeck),
+        position: target,
+      }
+    }));
+  }, [djState, initializeAudioContext]);
+
+  // Get deck progress (0..1)
+  const getDeckProgress = useCallback((deck: DeckSide) => {
+    const deckState = deck === 'left' ? djState.leftDeck : djState.rightDeck;
+    const startTimeRef = deck === 'left' ? leftStartTimeRef : rightStartTimeRef;
+    const offsetRef = deck === 'left' ? leftOffsetRef : rightOffsetRef;
+    const duration = deckState.currentSong?.duration || deckState.currentSong?.buffer?.duration || 0;
+    if (!duration) return 0;
+    let current = offsetRef.current;
+    if (deckState.isPlaying && audioContextRef.current) {
+      current += audioContextRef.current.currentTime - startTimeRef.current;
+    }
+    return Math.max(0, Math.min(1, current / duration));
+  }, [djState]);
+
   // Initialize on mount
   useEffect(() => {
     const handleUserInteraction = () => {
@@ -656,6 +732,8 @@ export const useDJEngine = () => {
     setDeckVolume,
     setMasterVolume,
     getFrequencyData,
+    seekDeck,
+    getDeckProgress,
     initializeAudioContext,
   };
 };

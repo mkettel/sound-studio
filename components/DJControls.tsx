@@ -16,6 +16,11 @@ interface DJControlsProps {
   onRightNext?: () => void;
   crossfaderValue?: number;
   onCrossfaderChange?: (value: number) => void;
+  // Per-deck waveform helpers
+  getLeftProgress?: () => number;
+  getRightProgress?: () => number;
+  onLeftScrub?: (progress: number) => void;
+  onRightScrub?: (progress: number) => void;
 }
 
 export default function DJControls({ 
@@ -29,7 +34,11 @@ export default function DJControls({
   onRightPrev = () => {},
   onRightNext = () => {},
   crossfaderValue = 0,
-  onCrossfaderChange = () => {}
+  onCrossfaderChange = () => {},
+  getLeftProgress,
+  getRightProgress,
+  onLeftScrub,
+  onRightScrub,
 }: DJControlsProps) {
   const [leftQueueExpanded, setLeftQueueExpanded] = useState(false);
   const [rightQueueExpanded, setRightQueueExpanded] = useState(false);
@@ -172,6 +181,8 @@ export default function DJControls({
           onTogglePlayback={onLeftTogglePlayback}
           onPrevious={onLeftPrev}
           onNext={onLeftNext}
+          getProgress={getLeftProgress}
+          onScrub={onLeftScrub}
         />
 
         {/* Right Queue Panel */}
@@ -188,6 +199,8 @@ export default function DJControls({
           onTogglePlayback={onRightTogglePlayback}
           onPrevious={onRightPrev}
           onNext={onRightNext}
+          getProgress={getRightProgress}
+          onScrub={onRightScrub}
         />
 
         </>

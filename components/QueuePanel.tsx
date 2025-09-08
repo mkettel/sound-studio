@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { Song } from '@/hooks/useDJEngine';
+import Waveform from './Waveform';
 
 interface QueuePanelProps {
   title: string;
@@ -17,6 +18,8 @@ interface QueuePanelProps {
   onTogglePlayback?: () => void;
   onPrevious?: () => void;
   onNext?: () => void;
+  getProgress?: () => number; // 0..1
+  onScrub?: (progress: number) => void; // 0..1
 }
 
 export default function   QueuePanel({
@@ -31,12 +34,15 @@ export default function   QueuePanel({
   onRemoveSong = () => {},
   onTogglePlayback = () => {},
   onPrevious = () => {},
-  onNext = () => {}
+  onNext = () => {},
+  getProgress,
+  onScrub,
 }: QueuePanelProps) {
   const expandedContentRef = useRef<HTMLDivElement>(null);
   const arrowRef = useRef<SVGSVGElement>(null);
   const playingLabelRef = useRef<HTMLDivElement>(null);
   const removeButtonRef = useRef<HTMLButtonElement>(null);
+  const [liveProgress, setLiveProgress] = useState(0);
 
   // Animate expand/collapse
   useEffect(() => {
@@ -114,6 +120,22 @@ export default function   QueuePanel({
     }
   }, [isExpanded]);
 
+  // Live progress updater for waveform
+  useEffect(() => {
+    let raf: number | null = null;
+    const tick = () => {
+      if (getProgress) setLiveProgress(getProgress());
+      raf = requestAnimationFrame(tick);
+    };
+    // only run when we have a song
+    if (currentSong) {
+      raf = requestAnimationFrame(tick);
+    }
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [getProgress, currentSong]);
+
   return (
     <div className={`fixed top-6 ${position === 'left' ? 'left-6' : 'right-6'} z-40 max-w-72 min-w-72`}>
       <div className="bg-black/30 backdrop-blur-sm border border-white/90 overflow-hidden">
@@ -177,56 +199,72 @@ export default function   QueuePanel({
           </div>
         )}
 
-        {/* Playback Controls - Always Visible */}
+        {/* Playback Controls + Waveform - Always Visible */}
         <div className="px-4 py-3 border-b border-white/10">
-          <div className="flex items-center justify-center gap-4">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onPrevious();
-              }}
-              disabled={isLoading}
-              className="text-white/60 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <polygon points="19,20 9,12 19,4" />
-                <line x1="5" y1="19" x2="5" y2="5" />
-              </svg>
-            </button>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onTogglePlayback();
-              }}
-              disabled={!currentSong || isLoading}
-              className={`${isPlaying ? 'text-red-400' : 'text-green-400'} hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              {isPlaying ? (
-                <div className="w-4 h-4 flex gap-1 items-center">
-                  <div className="bg-current h-4 w-1.5"></div>
-                  <div className="bg-current h-4 w-1.5"></div>
-                </div>
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <polygon points="5,3 19,12 5,21" />
+          <div className="flex items-center justify-between gap-6">
+            {/* Controls */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPrevious();
+                }}
+                disabled={isLoading}
+                className="text-white/60 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polygon points="19,20 9,12 19,4" />
+                  <line x1="5" y1="19" x2="5" y2="5" />
                 </svg>
-              )}
-            </button>
+              </button>
 
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onNext();
-              }}
-              disabled={isLoading}
-              className="text-white/60 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <polygon points="5,4 15,12 5,20" />
-                <line x1="19" y1="5" x2="19" y2="19" />
-              </svg>
-            </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTogglePlayback();
+                }}
+                disabled={!currentSong || isLoading}
+                className={`${isPlaying ? 'text-red-400' : 'text-green-400'} hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {isPlaying ? (
+                  <div className="w-4 h-4 flex gap-1 items-center">
+                    <div className="bg-current h-4 w-1.5"></div>
+                    <div className="bg-current h-4 w-1.5"></div>
+                  </div>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5,3 19,12 5,21" />
+                  </svg>
+                )}
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNext();
+                }}
+                disabled={isLoading}
+                className="text-white/60 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polygon points="5,4 15,12 5,20" />
+                  <line x1="19" y1="5" x2="19" y2="19" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Waveform (right aligned) */}
+            <div className="flex-1 flex justify-end items-center min-w-32">
+              <div className="w-40 sm:w-48 md:w-56 lg:w-64">
+                <Waveform 
+                  buffer={currentSong?.buffer}
+                  duration={currentSong?.duration}
+                  progress={liveProgress}
+                  height={28}
+                  onScrub={onScrub}
+                />
+              </div>
+            </div>
           </div>
         </div>
 

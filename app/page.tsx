@@ -18,7 +18,8 @@ export default function Home() {
     setCrossfader,
     setDeckVolume,
     setMasterVolume,
-    getFrequencyData,
+    seekDeck,
+    getDeckProgress,
   } = useDJEngine();
 
   // Left Deck Songs - Hip Hop & Electronic
@@ -143,6 +144,16 @@ export default function Home() {
         onRightNext={handleRightNext}
         crossfaderValue={djState.crossfaderValue}
         onCrossfaderChange={setCrossfader}
+        getLeftProgress={() => getDeckProgress('left')}
+        getRightProgress={() => getDeckProgress('right')}
+        onLeftScrub={(p) => {
+          const d = djState.leftDeck.currentSong?.duration || djState.leftDeck.currentSong?.buffer?.duration || 0;
+          if (d) seekDeck('left', p * d);
+        }}
+        onRightScrub={(p) => {
+          const d = djState.rightDeck.currentSong?.duration || djState.rightDeck.currentSong?.buffer?.duration || 0;
+          if (d) seekDeck('right', p * d);
+        }}
       />
     </main>
   );
