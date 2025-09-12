@@ -86,7 +86,7 @@ export default function LoadingSequence({ onComplete }: LoadingSequenceProps) {
         />
         
         {/* Optional loading indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+        <div className="absolute hidden bottom-8 left-1/2 transform -translate-x-1/2">
           <div className="text-white text-sm font-mono opacity-60">
             {Math.round((currentFrame / (totalFrames - 1)) * 100)}%
           </div>
