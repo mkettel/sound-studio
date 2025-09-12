@@ -22,7 +22,7 @@ export default function LoadingSequence({ onComplete }: LoadingSequenceProps) {
       for (let i = 0; i < totalFrames; i++) {
         const frameNumber = i.toString().padStart(2, '0');
         const img = new Image();
-        img.src = `/loader/AUW Listening Experience Loader 1 lights${frameNumber}.png`;
+        img.src = `/loader-optimized/AUW Listening Experience Loader 1 lights${frameNumber}.jpg`;
         promises.push(
           new Promise((resolve) => {
             img.onload = resolve;
@@ -64,7 +64,7 @@ export default function LoadingSequence({ onComplete }: LoadingSequenceProps) {
   }, [onComplete, totalFrames, frameDuration]);
 
   const frameNumber = currentFrame.toString().padStart(2, '0');
-  const imageSrc = `/loader/AUW Listening Experience Loader 1 lights${frameNumber}.png`;
+  const imageSrc = `/loader-optimized/AUW Listening Experience Loader 1 lights${frameNumber}.jpg`;
 
   return (
     <div 
