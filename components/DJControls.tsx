@@ -22,6 +22,9 @@ interface DJControlsProps {
   getRightProgress?: () => number;
   onLeftScrub?: (progress: number) => void;
   onRightScrub?: (progress: number) => void;
+  // Song selection
+  onLeftSelectSong?: (song: Song) => void;
+  onRightSelectSong?: (song: Song) => void;
   // Animation control
   isAppReady?: boolean;
 }
@@ -42,6 +45,8 @@ export default function DJControls({
   getRightProgress,
   onLeftScrub,
   onRightScrub,
+  onLeftSelectSong = () => {},
+  onRightSelectSong = () => {},
   isAppReady = false,
 }: DJControlsProps) {
   const [leftQueueExpanded, setLeftQueueExpanded] = useState(false);
@@ -210,7 +215,8 @@ export default function DJControls({
             isPlaying={djState?.leftDeck.isPlaying}
             isLoading={djState?.leftDeck.isLoading}
             onToggleExpanded={() => setLeftQueueExpanded(!leftQueueExpanded)}
-            onRemoveSong={(songId) => console.log('Remove left song:', songId)}
+            onRemoveSong={(songId) => {}}
+            onSelectSong={onLeftSelectSong}
             onTogglePlayback={onLeftTogglePlayback}
             onPrevious={onLeftPrev}
             onNext={onLeftNext}
@@ -230,7 +236,8 @@ export default function DJControls({
             isPlaying={djState?.rightDeck.isPlaying}
             isLoading={djState?.rightDeck.isLoading}
             onToggleExpanded={() => setRightQueueExpanded(!rightQueueExpanded)}
-            onRemoveSong={(songId) => console.log('Remove right song:', songId)}
+            onRemoveSong={(songId) => {}}
+            onSelectSong={onRightSelectSong}
             onTogglePlayback={onRightTogglePlayback}
             onPrevious={onRightPrev}
             onNext={onRightNext}

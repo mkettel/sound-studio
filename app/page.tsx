@@ -87,17 +87,13 @@ export default function Home() {
   useEffect(() => {
     // Only load songs after loading sequence completes
     if (!isLoading) {
-      console.log('Loading initial songs...', { leftDeckSongs, rightDeckSongs });
-      
       // Load both songs in parallel
       const loadInitialSongs = async () => {
         try {
           if (leftDeckSongs.length > 0 && !djState.leftDeck.currentSong) {
-            console.log('Loading left deck song:', leftDeckSongs[0]);
             await loadSong(leftDeckSongs[0], 'left');
           }
           if (rightDeckSongs.length > 0 && !djState.rightDeck.currentSong) {
-            console.log('Loading right deck song:', rightDeckSongs[0]);
             await loadSong(rightDeckSongs[0], 'right');
           }
         } catch (error) {
@@ -110,19 +106,9 @@ export default function Home() {
   }, [isLoading]); // Only depend on isLoading to avoid circular dependencies
 
   const handleLoadingComplete = () => {
-    console.log('Loading sequence complete, setting isLoading to false');
     setIsLoading(false);
   };
 
-  // Debug effect to monitor djState changes
-  useEffect(() => {
-    console.log('DJ State updated:', {
-      leftDeck: djState.leftDeck.currentSong?.title || 'No song',
-      rightDeck: djState.rightDeck.currentSong?.title || 'No song',
-      leftLoading: djState.leftDeck.isLoading,
-      rightLoading: djState.rightDeck.isLoading
-    });
-  }, [djState.leftDeck.currentSong, djState.rightDeck.currentSong, djState.leftDeck.isLoading, djState.rightDeck.isLoading]);
 
   // Animate crossfader in when app is ready
   useEffect(() => {
@@ -217,6 +203,12 @@ export default function Home() {
         onRightScrub={(p) => {
           const d = djState.rightDeck.currentSong?.duration || djState.rightDeck.currentSong?.buffer?.duration || 0;
           if (d) seekDeck('right', p * d);
+        }}
+        onLeftSelectSong={(song) => {
+          loadSong(song, 'left');
+        }}
+        onRightSelectSong={(song) => {
+          loadSong(song, 'right');
         }}
         isAppReady={!isLoading}
       />

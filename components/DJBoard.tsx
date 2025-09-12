@@ -1,7 +1,8 @@
 "use client";
 
 import { useDJEngine, Song } from '@/hooks/useDJEngine';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
 import AudioVisualizer from './AudioVisualizer';
 import { useIsMobile } from '@/hooks/useIsMobile';
 
@@ -41,6 +42,105 @@ function ControlPanel({
 }: ControlPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const isMobile = useIsMobile();
+  const [leftCurrentSongId, setLeftCurrentSongId] = useState<string | null>(null);
+  const [rightCurrentSongId, setRightCurrentSongId] = useState<string | null>(null);
+  
+  const leftSongCardRef = useRef<HTMLDivElement>(null);
+  const rightSongCardRef = useRef<HTMLDivElement>(null);
+  const leftThumbnailRef = useRef<HTMLDivElement>(null);
+  const rightThumbnailRef = useRef<HTMLDivElement>(null);
+
+  // Animate left deck song changes
+  useEffect(() => {
+    const leftSong = djState?.leftDeck.currentSong;
+    if (leftSong && leftSong.id !== leftCurrentSongId) {
+      const songCard = leftSongCardRef.current;
+      const thumbnail = leftThumbnailRef.current;
+      
+      if (songCard && thumbnail) {
+        gsap.fromTo(songCard,
+          { opacity: 0.6, scale: 0.95 },
+          { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }
+        );
+        gsap.fromTo(thumbnail,
+          { scale: 0.9, opacity: 0.7 },
+          { scale: 1, opacity: 1, duration: 0.8, ease: "power2.out" }
+        );
+      }
+      setLeftCurrentSongId(leftSong.id);
+    }
+  }, [djState?.leftDeck.currentSong, leftCurrentSongId]);
+
+  // Animate right deck song changes
+  useEffect(() => {
+    const rightSong = djState?.rightDeck.currentSong;
+    if (rightSong && rightSong.id !== rightCurrentSongId) {
+      const songCard = rightSongCardRef.current;
+      const thumbnail = rightThumbnailRef.current;
+      
+      if (songCard && thumbnail) {
+        gsap.fromTo(songCard,
+          { opacity: 0.6, scale: 0.95 },
+          { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }
+        );
+        gsap.fromTo(thumbnail,
+          { scale: 0.9, opacity: 0.7 },
+          { scale: 1, opacity: 1, duration: 0.8, ease: "power2.out" }
+        );
+      }
+      setRightCurrentSongId(rightSong.id);
+    }
+  }, [djState?.rightDeck.currentSong, rightCurrentSongId]);
+
+  // Animate loading states for left deck
+  useEffect(() => {
+    const thumbnail = leftThumbnailRef.current;
+    if (thumbnail) {
+      if (djState?.leftDeck.isLoading) {
+        gsap.to(thumbnail, {
+          opacity: 0.4,
+          scale: 0.9,
+          duration: 0.8,
+          ease: "power2.inOut",
+          repeat: -1,
+          yoyo: true
+        });
+      } else {
+        gsap.killTweensOf(thumbnail);
+        gsap.to(thumbnail, {
+          opacity: 1,
+          scale: 1,
+          duration: 0.4,
+          ease: "power2.out"
+        });
+      }
+    }
+  }, [djState?.leftDeck.isLoading]);
+
+  // Animate loading states for right deck
+  useEffect(() => {
+    const thumbnail = rightThumbnailRef.current;
+    if (thumbnail) {
+      if (djState?.rightDeck.isLoading) {
+        gsap.to(thumbnail, {
+          opacity: 0.4,
+          scale: 0.9,
+          duration: 0.8,
+          ease: "power2.inOut",
+          repeat: -1,
+          yoyo: true
+        });
+      } else {
+        gsap.killTweensOf(thumbnail);
+        gsap.to(thumbnail, {
+          opacity: 1,
+          scale: 1,
+          duration: 0.4,
+          ease: "power2.out"
+        });
+      }
+    }
+  }, [djState?.rightDeck.isLoading]);
   return (
     <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 z-40 transition-all duration-300">
       <div className={`bg-gradient-to-b from-gray-100/10 to-gray-200/5 backdrop-blur-md rounded-lg border border-gray-300/20 shadow-2xl transition-all duration-300 ${
@@ -91,9 +191,12 @@ function ControlPanel({
               <div className="text-white text-xs font-mono">R</div>
             </div> */}
 
-            <div className="flex mr-4 gap-2">
+            <div ref={leftSongCardRef} className="flex mr-4 gap-2">
               {/* Left Deck Info */}
-              <div className="w-10 h-10 bg-white/10 rounded-md overflow-hidden">
+              <div 
+                ref={leftThumbnailRef}
+                className="w-10 h-10 bg-white/10 rounded-md overflow-hidden"
+              >
                 <img src="/song-thumb.png" alt="Song Thumbnail" width={40} height={40}/>
               </div>
               <div className="flex flex-col items-start h-full">
@@ -143,9 +246,12 @@ function ControlPanel({
               />
             </div>
 
-            <div className="flex flex-row-reverse gap-2 ml-4">
+            <div ref={rightSongCardRef} className="flex flex-row-reverse gap-2 ml-4">
               {/* Right Deck Info */}
-              <div className="w-10 h-10 bg-white/10 rounded-md overflow-hidden">
+              <div 
+                ref={rightThumbnailRef}
+                className="w-10 h-10 bg-white/10 rounded-md overflow-hidden"
+              >
                 <img src="/song-thumb.png" alt="Song Thumbnail" width={40} height={40}/>
               </div>
               <div className="flex flex-col items-end h-full">

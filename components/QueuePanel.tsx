@@ -15,6 +15,7 @@ interface QueuePanelProps {
   isLoading?: boolean;
   onToggleExpanded?: () => void;
   onRemoveSong?: (songId: string) => void;
+  onSelectSong?: (song: Song) => void; // New: handle song selection
   onTogglePlayback?: () => void;
   onPrevious?: () => void;
   onNext?: () => void;
@@ -32,6 +33,7 @@ export default function   QueuePanel({
   isLoading = false,
   onToggleExpanded = () => {},
   onRemoveSong = () => {},
+  onSelectSong = () => {}, // New callback
   onTogglePlayback = () => {},
   onPrevious = () => {},
   onNext = () => {},
@@ -42,7 +44,10 @@ export default function   QueuePanel({
   const arrowRef = useRef<SVGSVGElement>(null);
   const playingLabelRef = useRef<HTMLDivElement>(null);
   const removeButtonRef = useRef<HTMLButtonElement>(null);
+  const songCardRef = useRef<HTMLDivElement>(null);
+  const songThumbnailRef = useRef<HTMLDivElement>(null);
   const [liveProgress, setLiveProgress] = useState(0);
+  const [currentSongId, setCurrentSongId] = useState<string | null>(null);
 
   // Animate expand/collapse
   useEffect(() => {
@@ -120,6 +125,74 @@ export default function   QueuePanel({
     }
   }, [isExpanded]);
 
+  // Animate song changes
+  useEffect(() => {
+    if (currentSong && currentSong.id !== currentSongId) {
+      // Song changed - animate it in
+      const songCard = songCardRef.current;
+      const thumbnail = songThumbnailRef.current;
+      
+      if (songCard && thumbnail) {
+        // Animate the song card
+        gsap.fromTo(songCard,
+          { 
+            opacity: 0.7,
+            scale: 0.95,
+          },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.6,
+            ease: "power2.out"
+          }
+        );
+
+        // Animate the thumbnail with a subtle pulse
+        gsap.fromTo(thumbnail,
+          {
+            scale: 0.9,
+            opacity: 0.8
+          },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out"
+          }
+        );
+      }
+      
+      setCurrentSongId(currentSong.id);
+    }
+  }, [currentSong, currentSongId]);
+
+  // Animate loading states
+  useEffect(() => {
+    const thumbnail = songThumbnailRef.current;
+    if (thumbnail) {
+      if (isLoading) {
+        // Pulse animation while loading
+        gsap.to(thumbnail, {
+          opacity: 0.5,
+          scale: 0.95,
+          duration: 0.8,
+          ease: "power2.inOut",
+          repeat: -1,
+          yoyo: true
+        });
+      } else {
+        // Stop loading animation and return to normal
+        gsap.killTweensOf(thumbnail);
+        gsap.to(thumbnail, {
+          opacity: 1,
+          scale: 1,
+          duration: 0.4,
+          ease: "power2.out"
+        });
+      }
+    }
+  }, [isLoading]);
+
   // Live progress updater for waveform
   useEffect(() => {
     let raf: number | null = null;
@@ -170,8 +243,11 @@ export default function   QueuePanel({
               >
                 PLAYING NOW
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 overflow-hidden flex-shrink-0">
+              <div ref={songCardRef} className="flex items-center gap-3">
+                <div 
+                  ref={songThumbnailRef}
+                  className="w-10 h-10 bg-white/10 overflow-hidden flex-shrink-0"
+                >
                   <img src="/song-thumb.png" alt="Album art" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -279,7 +355,13 @@ export default function   QueuePanel({
             </div>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {queueSongs.filter(song => song.id !== currentSong?.id).slice(0, 4).map((song, index) => (
-                <div key={song.id} className="flex items-center gap-3 p-2 pr-0 cursor-pointer hover:bg-white/5 transition-colors">
+                <div 
+                  key={song.id} 
+                  className="flex items-center gap-3 p-2 pr-0 cursor-pointer hover:bg-white/5 transition-colors"
+                  onClick={() => {
+                    onSelectSong(song);
+                  }}
+                >
                   <div className="w-8 h-8 bg-white/10 overflow-hidden flex-shrink-0">
                     <img src="/song-thumb.png" alt="Album art" className="w-full h-full object-cover" />
                   </div>

@@ -124,8 +124,6 @@ export const useDJEngine = () => {
       updateCrossfaderGains(0);
 
       setDJState(prev => ({ ...prev, isInitialized: true }));
-      
-      console.log('DJ Engine initialized successfully');
     } catch (error) {
       console.error('Failed to initialize audio context:', error);
     }
@@ -160,7 +158,6 @@ export const useDJEngine = () => {
           queuedSong: null,
         }
       }));
-      console.log(`Dequeued song "${song.title}" from ${deck} deck`);
       return;
     }
     
@@ -189,8 +186,6 @@ export const useDJEngine = () => {
             isQueueLoading: false,
           }
         }));
-
-        console.log(`Queued song "${song.title}" on ${deck} deck`);
       } catch (error) {
         console.error(`Failed to queue song "${song.title}":`, error);
         setDJState(prev => ({
@@ -227,8 +222,6 @@ export const useDJEngine = () => {
             position: 0,
           }
         }));
-
-        console.log(`Loaded song "${song.title}" on ${deck} deck`);
       } catch (error) {
         console.error(`Failed to load song "${song.title}":`, error);
         setDJState(prev => ({
@@ -303,8 +296,6 @@ export const useDJEngine = () => {
             position: 0,
           }
         }));
-
-        console.log(`Transitioned to queued song on ${deck} deck`);
         return;
       } else {
         // Normal pause
@@ -602,8 +593,6 @@ export const useDJEngine = () => {
           };
         }
       }
-
-      console.log(`Advanced to next song "${nextSongToPlay.title}" on ${deck} deck`);
     } catch (error) {
       console.error(`Failed to load next song "${nextSongToPlay.title}":`, error);
       setDJState(prev => ({
@@ -708,8 +697,6 @@ export const useDJEngine = () => {
           };
         }
       }
-
-      console.log(`Advanced to previous song "${prevSongToPlay.title}" on ${deck} deck`);
     } catch (error) {
       console.error(`Failed to load previous song "${prevSongToPlay.title}":`, error);
       setDJState(prev => ({
