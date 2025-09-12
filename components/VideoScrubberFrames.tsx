@@ -12,6 +12,7 @@ interface VideoSegment {
 interface VideoScrubberFramesProps {
   frameCount?: number;
   segments?: VideoSegment[];
+  isAppReady?: boolean;
 }
 
 // New transition-based frame mapping using actual frame numbers
@@ -34,6 +35,7 @@ const defaultSegments: VideoSegment[] = [
 export default function VideoScrubberFrames({
   frameCount = 278,
   segments = defaultSegments,
+  isAppReady = false,
 }: VideoScrubberFramesProps) {
   console.log("🎬 VideoScrubberFrames component loaded!");
   
@@ -43,6 +45,8 @@ export default function VideoScrubberFrames({
   const [activeSegment, setActiveSegment] = useState<string>("home");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isLooping, setIsLooping] = useState(true);
+  
+  const buttonsRef = useRef<HTMLDivElement>(null);
 
   // Image cache and loading
   const images = useRef<HTMLImageElement[]>([]);
@@ -386,6 +390,23 @@ export default function VideoScrubberFrames({
     }
   }, [isLoaded, activeSegment, isTransitioning]);
 
+  // Animate buttons in when app is ready
+  useEffect(() => {
+    if (isAppReady && isLoaded && buttonsRef.current) {
+      gsap.fromTo(buttonsRef.current, 
+        {
+          opacity: 0
+        },
+        {
+          opacity: 1,
+          duration: 1.2,
+          delay: 0.2, // Delay to let other elements fade first
+          ease: "power2.out"
+        }
+      );
+    }
+  }, [isAppReady, isLoaded]);
+
   return (
     <div className="relative w-full h-full">
       <canvas
@@ -399,7 +420,11 @@ export default function VideoScrubberFrames({
       
       {/* Navigation Buttons */}
       {isLoaded && (
-        <div className="absolute w-full bottom-0 right-0 z-10">
+        <div 
+          ref={buttonsRef}
+          className="absolute w-full bottom-0 right-0 z-10"
+          style={{ opacity: 0 }} // Start invisible for GSAP
+        >
           <div className="flex w-full ">
             <div className="w-full flex">
               <div className="flex w-full m-2">

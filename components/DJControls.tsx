@@ -1,7 +1,8 @@
 "use client";
 
 import { useDJEngine, Song } from '@/hooks/useDJEngine';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
 import QueuePanel from './QueuePanel';
 
 interface DJControlsProps {
@@ -21,6 +22,8 @@ interface DJControlsProps {
   getRightProgress?: () => number;
   onLeftScrub?: (progress: number) => void;
   onRightScrub?: (progress: number) => void;
+  // Animation control
+  isAppReady?: boolean;
 }
 
 export default function DJControls({ 
@@ -39,9 +42,38 @@ export default function DJControls({
   getRightProgress,
   onLeftScrub,
   onRightScrub,
+  isAppReady = false,
 }: DJControlsProps) {
   const [leftQueueExpanded, setLeftQueueExpanded] = useState(false);
   const [rightQueueExpanded, setRightQueueExpanded] = useState(false);
+  const leftQueueRef = useRef<HTMLDivElement>(null);
+  const rightQueueRef = useRef<HTMLDivElement>(null);
+  const crossfaderRef = useRef<HTMLDivElement>(null);
+
+  // Animate components in when app is ready
+  useEffect(() => {
+    if (isAppReady) {
+      const timeline = gsap.timeline();
+      
+      // Set initial states (invisible)
+      gsap.set([leftQueueRef.current, rightQueueRef.current], {
+        opacity: 0
+      });
+
+      // Animate them in with staggered fade timing
+      timeline
+        .to(leftQueueRef.current, {
+          opacity: 1,
+          duration: 1.0,
+          ease: "power2.out"
+        }, 0.1)
+        .to(rightQueueRef.current, {
+          opacity: 1,
+          duration: 1.0,
+          ease: "power2.out"
+        }, 0.1);
+    }
+  }, [isAppReady]);
 
     return (
         <>
@@ -168,40 +200,44 @@ export default function DJControls({
         </div>
 
         {/* Left Queue Panel */}
-        <QueuePanel
-          title="PLAY QUEUE"
-          position="left"
-          isExpanded={leftQueueExpanded}
-          currentSong={djState?.leftDeck.currentSong}
-          queueSongs={leftDeckSongs}
-          isPlaying={djState?.leftDeck.isPlaying}
-          isLoading={djState?.leftDeck.isLoading}
-          onToggleExpanded={() => setLeftQueueExpanded(!leftQueueExpanded)}
-          onRemoveSong={(songId) => console.log('Remove left song:', songId)}
-          onTogglePlayback={onLeftTogglePlayback}
-          onPrevious={onLeftPrev}
-          onNext={onLeftNext}
-          getProgress={getLeftProgress}
-          onScrub={onLeftScrub}
-        />
+        <div ref={leftQueueRef} style={{ opacity: 0 }}>
+          <QueuePanel
+            title="PLAY QUEUE"
+            position="left"
+            isExpanded={leftQueueExpanded}
+            currentSong={djState?.leftDeck.currentSong}
+            queueSongs={leftDeckSongs}
+            isPlaying={djState?.leftDeck.isPlaying}
+            isLoading={djState?.leftDeck.isLoading}
+            onToggleExpanded={() => setLeftQueueExpanded(!leftQueueExpanded)}
+            onRemoveSong={(songId) => console.log('Remove left song:', songId)}
+            onTogglePlayback={onLeftTogglePlayback}
+            onPrevious={onLeftPrev}
+            onNext={onLeftNext}
+            getProgress={getLeftProgress}
+            onScrub={onLeftScrub}
+          />
+        </div>
 
         {/* Right Queue Panel */}
-        <QueuePanel
-          title="PLAY QUEUE"
-          position="right"
-          isExpanded={rightQueueExpanded}
-          currentSong={djState?.rightDeck.currentSong}
-          queueSongs={rightDeckSongs}
-          isPlaying={djState?.rightDeck.isPlaying}
-          isLoading={djState?.rightDeck.isLoading}
-          onToggleExpanded={() => setRightQueueExpanded(!rightQueueExpanded)}
-          onRemoveSong={(songId) => console.log('Remove right song:', songId)}
-          onTogglePlayback={onRightTogglePlayback}
-          onPrevious={onRightPrev}
-          onNext={onRightNext}
-          getProgress={getRightProgress}
-          onScrub={onRightScrub}
-        />
+        <div ref={rightQueueRef} style={{ opacity: 0 }}>
+          <QueuePanel
+            title="PLAY QUEUE"
+            position="right"
+            isExpanded={rightQueueExpanded}
+            currentSong={djState?.rightDeck.currentSong}
+            queueSongs={rightDeckSongs}
+            isPlaying={djState?.rightDeck.isPlaying}
+            isLoading={djState?.rightDeck.isLoading}
+            onToggleExpanded={() => setRightQueueExpanded(!rightQueueExpanded)}
+            onRemoveSong={(songId) => console.log('Remove right song:', songId)}
+            onTogglePlayback={onRightTogglePlayback}
+            onPrevious={onRightPrev}
+            onNext={onRightNext}
+            getProgress={getRightProgress}
+            onScrub={onRightScrub}
+          />
+        </div>
 
         </>
     )

@@ -5,10 +5,15 @@ import DJBoard from "@/components/DJBoard";
 import DJControls from "@/components/DJControls";
 import MasterVolume from "@/components/MasterVolume";
 import Crossfader from "@/components/Crossfader";
+import LoadingSequence from "@/components/LoadingSequence";
 import { useDJEngine, Song } from '@/hooks/useDJEngine';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
 
 export default function Home() {
+  const [isLoading, setIsLoading] = useState(true);
+  const crossfaderRef = useRef<HTMLDivElement>(null);
+  
   const {
     djState,
     loadSong,
@@ -80,13 +85,61 @@ export default function Home() {
 
   // Auto-load first songs on mount - using useEffect with empty dependency array
   useEffect(() => {
-    if (leftDeckSongs.length > 0) {
-      loadSong(leftDeckSongs[0], 'left');
+    // Only load songs after loading sequence completes
+    if (!isLoading) {
+      console.log('Loading initial songs...', { leftDeckSongs, rightDeckSongs });
+      
+      // Load both songs in parallel
+      const loadInitialSongs = async () => {
+        try {
+          if (leftDeckSongs.length > 0 && !djState.leftDeck.currentSong) {
+            console.log('Loading left deck song:', leftDeckSongs[0]);
+            await loadSong(leftDeckSongs[0], 'left');
+          }
+          if (rightDeckSongs.length > 0 && !djState.rightDeck.currentSong) {
+            console.log('Loading right deck song:', rightDeckSongs[0]);
+            await loadSong(rightDeckSongs[0], 'right');
+          }
+        } catch (error) {
+          console.error('Error loading initial songs:', error);
+        }
+      };
+      
+      loadInitialSongs();
     }
-    if (rightDeckSongs.length > 0) {
-      loadSong(rightDeckSongs[0], 'right');
+  }, [isLoading]); // Only depend on isLoading to avoid circular dependencies
+
+  const handleLoadingComplete = () => {
+    console.log('Loading sequence complete, setting isLoading to false');
+    setIsLoading(false);
+  };
+
+  // Debug effect to monitor djState changes
+  useEffect(() => {
+    console.log('DJ State updated:', {
+      leftDeck: djState.leftDeck.currentSong?.title || 'No song',
+      rightDeck: djState.rightDeck.currentSong?.title || 'No song',
+      leftLoading: djState.leftDeck.isLoading,
+      rightLoading: djState.rightDeck.isLoading
+    });
+  }, [djState.leftDeck.currentSong, djState.rightDeck.currentSong, djState.leftDeck.isLoading, djState.rightDeck.isLoading]);
+
+  // Animate crossfader in when app is ready
+  useEffect(() => {
+    if (!isLoading && crossfaderRef.current) {
+      gsap.fromTo(crossfaderRef.current, 
+        {
+          opacity: 0
+        },
+        {
+          opacity: 1,
+          duration: 1.0,
+          delay: 0.2, // Delay to let queue panels fade first
+          ease: "power2.out"
+        }
+      );
     }
-  }, []); // Empty dependency array - only run once on mount
+  }, [isLoading]);
 
   // Navigation functions using the new DJ engine functions
   const handleLeftPrev = () => {
@@ -107,19 +160,30 @@ export default function Home() {
 
   return (
     <main className="relative min-h-screen">
+      {/* Loading Sequence */}
+      {isLoading && (
+        <LoadingSequence onComplete={handleLoadingComplete} />
+      )}
+
       {/* Fullscreen video background */}
       <div className="fixed inset-0 w-full h-full">
-        <VideoScrubberFrames />
+        <VideoScrubberFrames isAppReady={!isLoading} />
       </div>
 
       {/* Crossfader - Center position */}
-      <div className="fixed bottom-16 left-1/2 transform -translate-x-1/2 z-50">
-        <Crossfader 
-          value={djState.crossfaderValue}
-          onValueChange={setCrossfader}
-          className=""
-        />
-      </div>
+      {!isLoading && (
+        <div 
+          ref={crossfaderRef}
+          className="fixed bottom-16 left-1/2 transform -translate-x-1/2 z-50"
+          style={{ opacity: 0 }} // Start invisible for GSAP
+        >
+          <Crossfader 
+            value={djState.crossfaderValue}
+            onValueChange={setCrossfader}
+            className=""
+          />
+        </div>
+      )}
 
       {/* Master Volume Control - Right side */}
       <div className="fixed hidden bottom-14 right-8 z-50">
@@ -154,6 +218,7 @@ export default function Home() {
           const d = djState.rightDeck.currentSong?.duration || djState.rightDeck.currentSong?.buffer?.duration || 0;
           if (d) seekDeck('right', p * d);
         }}
+        isAppReady={!isLoading}
       />
     </main>
   );
