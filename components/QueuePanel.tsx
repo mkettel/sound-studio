@@ -239,7 +239,7 @@ export default function   QueuePanel({
             <div className="px-4 py-2">
               <div 
                 ref={playingLabelRef}
-                className={`text-white/60 text-xs uppercase tracking-wider mb-2 ${isExpanded ? 'block' : 'hidden'}`}
+                className={`text-white/60 text-xs uppercase tracking-wider mb-2 ${isExpanded ? 'hidden' : 'hidden'}`}
               >
                 PLAYING NOW
               </div>
