@@ -215,7 +215,7 @@ export default function VideoScrubberFrames({
       tlRef.current.kill();
     }
 
-    // Get transition frames
+    // Get transition frames now
     const transitionFrames = getTransitionFrames(activeSegment, segment.id);
     
     if (transitionFrames.length === 0) {
