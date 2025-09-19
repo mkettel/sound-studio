@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { Song } from '@/hooks/useDJEngine';
 import Waveform from './Waveform';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface QueuePanelProps {
   title: string;
@@ -48,6 +49,8 @@ export default function   QueuePanel({
   const songThumbnailRef = useRef<HTMLDivElement>(null);
   const [liveProgress, setLiveProgress] = useState(0);
   const [currentSongId, setCurrentSongId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
+  const [isMobileMinimized, setIsMobileMinimized] = useState(true); // Start minimized on mobile
 
   // Animate expand/collapse
   useEffect(() => {
@@ -209,28 +212,58 @@ export default function   QueuePanel({
     };
   }, [getProgress, currentSong]);
 
+  // Mobile: Show as compact bottom tabs when minimized
+  if (isMobile && isMobileMinimized) {
+    return (
+      <div 
+        className={`fixed top-5 ${position === 'left' ? 'left-4' : 'right-4'} z-40 w-14 h-14 cursor-pointer`}
+        onClick={() => setIsMobileMinimized(false)}
+      >
+        <div className="bg-black/50 backdrop-blur-sm border border-white/60  w-full h-full flex items-center justify-center">
+          <div className="text-white text-xs font-mono text-center">
+            {position === 'left' ? 'L' : 'R'}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`fixed top-6 ${position === 'left' ? 'left-6' : 'right-6'} z-40 max-w-72 min-w-72`}>
+    <div className={`fixed ${isMobile ? `top-4 ${position === 'left' ? 'left-4   mr-2' : 'right-4 ml-2'} max-w-none` : `top-6 ${position === 'left' ? 'left-6' : 'right-6'} max-w-72 min-w-72`} z-40`}>
       <div className="bg-black/30 backdrop-blur-sm border border-white/90 min-h-40 overflow-hidden">
         {/* Header with toggle */}
         <div 
           className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors"
-          onClick={onToggleExpanded}
+          onClick={isMobile ? undefined : onToggleExpanded}
         >
           <div className="text-white text-sm font-medium uppercase tracking-tight">
             {title}
           </div>
-          <button className="text-white/60 hover:text-white transition-colors">
-            <svg 
-              ref={arrowRef}
-              className="w-4 h-4"
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-2">
+            {isMobile && (
+              <button 
+                className="text-white/60 hover:text-white transition-colors p-1"
+                onClick={() => setIsMobileMinimized(true)}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+            {!isMobile && (
+              <button className="text-white/60 hover:text-white transition-colors">
+                <svg 
+                  ref={arrowRef}
+                  className="w-4 h-4"
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Currently Playing Section - Always Visible */}
