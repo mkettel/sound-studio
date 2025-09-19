@@ -9,6 +9,7 @@ interface LoadingSequenceProps {
 export default function LoadingSequence({ onComplete }: LoadingSequenceProps) {
   const [currentFrame, setCurrentFrame] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [isPreloading, setIsPreloading] = useState(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
@@ -35,6 +36,7 @@ export default function LoadingSequence({ onComplete }: LoadingSequenceProps) {
 
     // Start animation after preloading
     preloadImages().then(() => {
+      setIsPreloading(false);
       startTimeRef.current = Date.now();
       
       intervalRef.current = setInterval(() => {
@@ -72,26 +74,37 @@ export default function LoadingSequence({ onComplete }: LoadingSequenceProps) {
         isComplete ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
-      <div className="relative w-full h-full flex items-center justify-center">
-        <img
-          src={imageSrc}
-          alt={`Loading frame ${currentFrame + 1}`}
-          className="max-w-full max-h-full object-contain"
-          style={{ 
-            imageRendering: 'crisp-edges',
-            width: '100vw',
-            height: '100vh',
-            objectFit: 'cover'
-          }}
-        />
-        
-        {/* Optional loading indicator */}
-        <div className="absolute hidden bottom-8 left-1/2 transform -translate-x-1/2">
+      {isPreloading ? (
+        // Simple preloader while frames are loading
+        <div className="flex flex-col items-center justify-center">
+          <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mb-4"></div>
           <div className="text-white text-sm font-mono opacity-60">
-            {Math.round((currentFrame / (totalFrames - 1)) * 100)}%
+            AUW Listening Experience
           </div>
         </div>
-      </div>
+      ) : (
+        // Main intro animation
+        <div className="relative w-full h-full flex items-center justify-center">
+          <img
+            src={imageSrc}
+            alt={`Loading frame ${currentFrame + 1}`}
+            className="max-w-full max-h-full object-contain"
+            style={{ 
+              imageRendering: 'crisp-edges',
+              width: '100vw',
+              height: '100vh',
+              objectFit: 'cover'
+            }}
+          />
+          
+          {/* Optional loading indicator */}
+          <div className="absolute hidden bottom-8 left-1/2 transform -translate-x-1/2">
+            <div className="text-white text-sm font-mono opacity-60">
+              {Math.round((currentFrame / (totalFrames - 1)) * 100)}%
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

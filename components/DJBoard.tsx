@@ -403,7 +403,7 @@ export default function DJBoard() {
       id: 'L3',
       title: 'Stargazer',
       artist: 'Alien I Trust (125 BPM)',
-      url: '/audio/Stargazer by Alien I Trust 125 BPM.wav'
+      url: '/audio/Stargazer by Alien I Trust 125 BPM.mp3'
     }
   ];
 
@@ -419,13 +419,13 @@ export default function DJBoard() {
       id: 'R2',
       title: 'Situation Sample Pack',
       artist: 'Xhale303',
-      url: '/audio/Situation Sample Pack by Xhale303.wav'
+      url: '/audio/Situation Sample Pack by Xhale303.mp3'
     },
     {
       id: 'R3',
       title: 'Slow Ethereal Piano Loop',
       artist: '80 BPM',
-      url: '/audio/Slow Ethereal Piano Loop 80 BPM.wav'
+      url: '/audio/Slow Ethereal Piano Loop 80 BPM.mp3'
     }
   ];
 
