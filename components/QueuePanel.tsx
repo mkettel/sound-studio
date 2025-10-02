@@ -281,7 +281,7 @@ export default function   QueuePanel({
                   ref={songThumbnailRef}
                   className="w-10 h-10 bg-white/10 overflow-hidden flex-shrink-0"
                 >
-                  <img src="/song-thumb.png" alt="Album art" className="w-full h-full object-cover" />
+                  <img src="/lou-thumb.jpeg" alt="Album art" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-white text-sm font-medium truncate">
@@ -390,13 +390,13 @@ export default function   QueuePanel({
               {queueSongs.filter(song => song.id !== currentSong?.id).slice(0, 4).map((song, index) => (
                 <div 
                   key={song.id} 
-                  className="flex items-center gap-3 p-2 pr-0 cursor-pointer hover:bg-white/5 transition-colors"
+                  className="flex items-center gap-3 py-1 px-0 cursor-pointer duration-300 hover:translate-x-0.5"
                   onClick={() => {
                     onSelectSong(song);
                   }}
                 >
                   <div className="w-8 h-8 bg-white/10 overflow-hidden flex-shrink-0">
-                    <img src="/song-thumb.png" alt="Album art" className="w-full h-full object-cover" />
+                    <img src="/lou-thumb.jpeg" alt="Album art" className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-white text-sm font-medium truncate">

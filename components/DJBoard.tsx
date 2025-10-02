@@ -197,7 +197,7 @@ function ControlPanel({
                 ref={leftThumbnailRef}
                 className="w-10 h-10 bg-white/10 rounded-md overflow-hidden"
               >
-                <img src="/song-thumb.png" alt="Song Thumbnail" width={40} height={40}/>
+                <img src="/lou-thumb.jpeg" alt="Song Thumbnail" width={40} height={40}/>
               </div>
               <div className="flex flex-col items-start h-full">
                 <div className="text-white text-xs font-mono truncate max-w-32">
@@ -252,7 +252,7 @@ function ControlPanel({
                 ref={rightThumbnailRef}
                 className="w-10 h-10 bg-white/10 rounded-md overflow-hidden"
               >
-                <img src="/song-thumb.png" alt="Song Thumbnail" width={40} height={40}/>
+                <img src="/lou-thumb.jpeg" alt="Song Thumbnail" width={40} height={40}/>
               </div>
               <div className="flex flex-col items-end h-full">
                 <div className="text-white text-xs font-mono truncate max-w-32">
@@ -339,7 +339,7 @@ function ControlPanel({
             <div className="flex gap-2 items-center">
               {/* Song Thumbnail */}
               <div className="w-10 h-10 bg-white/10 rounded-md">
-                <img src="/song-thumb.png" alt="Song Thumbnail" width={40} height={40} />
+                <img src="/lou-thumb.jpeg" alt="Song Thumbnail" width={40} height={40} />
               </div>
             </div>
 

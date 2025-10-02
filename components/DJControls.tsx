@@ -88,7 +88,7 @@ export default function DJControls({
             {/* Left Deck Info */}
             <div className="flex items-center p-3 rounded-r-lg">
               <div className="w-12 h-12 bg-white/10 rounded-md overflow-hidden mr-3">
-                <img src="/song-thumb.png" alt="Song Thumbnail" width={48} height={48}/>
+                <img src="/lou-thumb.jpeg" alt="Song Thumbnail" width={48} height={48}/>
               </div>
               <div className="flex flex-col">
                 <div className="text-white text-sm font-medium truncate max-w-32">
@@ -173,7 +173,7 @@ export default function DJControls({
                 </div>
               </div>
               <div className="w-12 h-12 bg-white/10 rounded-md overflow-hidden ml-4">
-                <img src="/song-thumb.png" alt="Song Thumbnail" width={48} height={48}/>
+                <img src="/lou-thumb.jpeg" alt="Song Thumbnail" width={48} height={48}/>
               </div>
             </div>
           </div>
