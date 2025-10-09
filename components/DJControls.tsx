@@ -207,7 +207,7 @@ export default function DJControls({
         {/* Left Queue Panel */}
         <div ref={leftQueueRef} style={{ opacity: 0 }}>
           <QueuePanel
-            title="PLAY QUEUE"
+            title="LEFT RECORD"
             position="left"
             isExpanded={leftQueueExpanded}
             currentSong={djState?.leftDeck.currentSong}
@@ -229,7 +229,7 @@ export default function DJControls({
         {/* Right Queue Panel */}
         <div ref={rightQueueRef} style={{ opacity: 0 }}>
           <QueuePanel
-            title="PLAY QUEUE"
+            title="RIGHT RECORD"
             position="right"
             isExpanded={rightQueueExpanded}
             currentSong={djState?.rightDeck.currentSong}
