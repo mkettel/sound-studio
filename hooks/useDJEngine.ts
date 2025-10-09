@@ -55,7 +55,7 @@ export const useDJEngine = () => {
       currentSong: null,
       queuedSong: null,
       isPlaying: false,
-      volume: 0.8,
+      volume: 1,
       position: 0,
       isLoading: false,
       isQueueLoading: false,
@@ -64,13 +64,13 @@ export const useDJEngine = () => {
       currentSong: null,
       queuedSong: null,
       isPlaying: false,
-      volume: 0.8,
+      volume: 1,
       position: 0,
       isLoading: false,
       isQueueLoading: false,
     },
     crossfaderValue: 0, // Center position
-    masterVolume: 0.7,
+    masterVolume: 1,
     isInitialized: false,
   });
 
@@ -200,9 +200,9 @@ export const useDJEngine = () => {
       // Load directly if deck is not playing
       setDJState(prev => ({
         ...prev,
-        [deck + 'Deck']: { 
-          ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
-          isLoading: true 
+        [deck + 'Deck']: {
+          ...(deck === 'left' ? prev.leftDeck : prev.rightDeck),
+          isLoading: true
         }
       }));
 
@@ -210,8 +210,12 @@ export const useDJEngine = () => {
         const response = await fetch(song.url);
         const arrayBuffer = await response.arrayBuffer();
         const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
-        
+
         const songWithBuffer = { ...song, buffer: audioBuffer, duration: audioBuffer.duration };
+
+        // Reset offset for new song
+        const offsetRef = deck === 'left' ? leftOffsetRef : rightOffsetRef;
+        offsetRef.current = 0;
 
         setDJState(prev => ({
           ...prev,
@@ -226,9 +230,9 @@ export const useDJEngine = () => {
         console.error(`Failed to load song "${song.title}":`, error);
         setDJState(prev => ({
           ...prev,
-          [deck + 'Deck']: { 
-            ...(deck === 'left' ? prev.leftDeck : prev.rightDeck), 
-            isLoading: false 
+          [deck + 'Deck']: {
+            ...(deck === 'left' ? prev.leftDeck : prev.rightDeck),
+            isLoading: false
           }
         }));
       }
@@ -522,7 +526,11 @@ export const useDJEngine = () => {
     
     // Remember if we were playing
     const wasPlaying = deckState.isPlaying;
-    
+
+    // Reset offset for new song
+    const offsetRef = deck === 'left' ? leftOffsetRef : rightOffsetRef;
+    offsetRef.current = 0;
+
     // Stop current playback if playing
     if (wasPlaying) {
       const sourceRef = deck === 'left' ? leftSourceRef : rightSourceRef;
@@ -530,9 +538,6 @@ export const useDJEngine = () => {
         sourceRef.current.stop();
         sourceRef.current = null;
       }
-      // Reset offset for new song
-      const offsetRef = deck === 'left' ? leftOffsetRef : rightOffsetRef;
-      offsetRef.current = 0;
     }
 
     // Load the next song directly
@@ -623,10 +628,14 @@ export const useDJEngine = () => {
     // Get previous song (loop to end if at beginning)
     const prevIndex = currentIndex === 0 ? playlist.length - 1 : currentIndex - 1;
     const prevSongToPlay = playlist[prevIndex];
-    
+
     // Remember if we were playing
     const wasPlaying = deckState.isPlaying;
-    
+
+    // Reset offset for new song
+    const offsetRef = deck === 'left' ? leftOffsetRef : rightOffsetRef;
+    offsetRef.current = 0;
+
     // Stop current playback if playing
     if (wasPlaying) {
       const sourceRef = deck === 'left' ? leftSourceRef : rightSourceRef;
@@ -634,9 +643,6 @@ export const useDJEngine = () => {
         sourceRef.current.stop();
         sourceRef.current = null;
       }
-      // Reset offset for new song
-      const offsetRef = deck === 'left' ? leftOffsetRef : rightOffsetRef;
-      offsetRef.current = 0;
     }
 
     // Load the previous song directly

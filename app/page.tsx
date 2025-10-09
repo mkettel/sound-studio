@@ -31,55 +31,73 @@ export default function Home() {
   const leftDeckSongs: Song[] = [
     {
       id: 'L1',
-      title: 'Cinematic Hip Hop Vlog Music',
-      artist: 'Rocky Slade',
-      url: '/audio/Cinematic Hip Hop Vlog Music.mp3'
+      title: 'Is My Mic On',
+      artist: 'Lou Phelps',
+      url: '/audio/Is My Mic On - Lou Phelps.mp3'
     },
     {
       id: 'L2',
-      title: 'Happy Sad Feeling Guitar',
-      artist: 'RockerPlate',
-      url: '/audio/Happy Sad Feeling Guitar by RockerPlate.mp3'
+      title: '4 My Children',
+      artist: 'Lou Phelps',
+      url: '/audio/Lou Phelps 4 My Children.mp3'
     },
     {
       id: 'L3',
-      title: 'Stargazer',
-      artist: 'Alien I Trust (125 BPM)',
-      url: '/audio/Stargazer by Alien I Trust 125 BPM.mp3'
-    },  
+      title: 'After I',
+      artist: 'Lou Phelps Ft Goldlink',
+      url: '/audio/Lou Phelps After I Ft Goldlink.mp3'
+    },
     {
       id: 'L4',
-      title: 'Stargazer',
-      artist: 'Alien I Trust (125 BPM)',
-      url: '/audio/Stargazer by Alien I Trust 125 BPM.mp3'
+      title: 'Afterparty',
+      artist: 'Lou Phelps',
+      url: '/audio/Lou Phelps Afterparty LDMIX2MASTER2.mp3'
     },
     {
       id: 'L5',
-      title: 'Stargazer',
-      artist: 'Alien I Trust (125 BPM)',
-      url: '/audio/Stargazer by Alien I Trust 125 BPM.mp3'
+      title: 'BBW Luh',
+      artist: 'Lou Phelps',
+      url: '/audio/Lou Phelps BBW Luh LDMIX2 Master.mp3'
     }
   ];
 
   // Right Deck Songs - Ambient & Guitar
   const rightDeckSongs: Song[] = [
     {
-      id: 'R1', 
-      title: 'Tell Me What',
-      artist: 'Timber Cat',
-      url: '/audio/Tell Me What.mp3'
+      id: 'R1',
+      title: 'I Dunno',
+      artist: 'Lou Phelps',
+      url: '/audio/Lou Phelps I Dunno Master Aug 9 2023.mp3'
     },
     {
       id: 'R2',
-      title: 'Situation Sample Pack',
-      artist: 'Xhale303',
-      url: '/audio/Situation Sample Pack by Xhale303.mp3'
+      title: 'JUNGLE',
+      artist: 'Lou Phelps',
+      url: '/audio/Lou Phelps JUNGLE LDMIX3MASTER2.mp3'
     },
     {
       id: 'R3',
-      title: 'Slow Ethereal Piano Loop',
-      artist: '80 BPM',
-      url: '/audio/Slow Ethereal Piano Loop 80 BPM.mp3'
+      title: 'Shady Pitched Up',
+      artist: 'Lou Phelps',
+      url: '/audio/Lou Phelps Shady Pitched Up.mp3'
+    },
+    {
+      id: 'R4',
+      title: "Tu T'en Souviens",
+      artist: 'Lou Phelps',
+      url: '/audio/Lou Phelps Tu T\'en Souviens.mp3'
+    },
+    {
+      id: 'R5',
+      title: 'Under My Skin',
+      artist: 'Lou Phelps Ft Nono Black',
+      url: '/audio/Lou Phelps Under My Skin Ft Nono Black.mp3'
+    },
+    {
+      id: 'R6',
+      title: 'Toutes les nanas (Interlude)',
+      artist: 'Lou Phelps',
+      url: '/audio/Lou Phelps - Toutes les nanas (Interlude) - LDMIX5MASTER1.mp3'
     }
   ];
 

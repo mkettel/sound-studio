@@ -211,6 +211,7 @@ export default function DJControls({
             position="left"
             isExpanded={leftQueueExpanded}
             currentSong={djState?.leftDeck.currentSong}
+            queuedSong={djState?.leftDeck.queuedSong}
             queueSongs={leftDeckSongs}
             isPlaying={djState?.leftDeck.isPlaying}
             isLoading={djState?.leftDeck.isLoading}
@@ -232,6 +233,7 @@ export default function DJControls({
             position="right"
             isExpanded={rightQueueExpanded}
             currentSong={djState?.rightDeck.currentSong}
+            queuedSong={djState?.rightDeck.queuedSong}
             queueSongs={rightDeckSongs}
             isPlaying={djState?.rightDeck.isPlaying}
             isLoading={djState?.rightDeck.isLoading}

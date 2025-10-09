@@ -11,6 +11,7 @@ interface QueuePanelProps {
   position: 'left' | 'right';
   isExpanded?: boolean;
   currentSong?: Song;
+  queuedSong?: Song; // New: queued song
   queueSongs?: Song[];
   isPlaying?: boolean;
   isLoading?: boolean;
@@ -29,6 +30,7 @@ export default function   QueuePanel({
   position,
   isExpanded = false,
   currentSong,
+  queuedSong,
   queueSongs = [],
   isPlaying = false,
   isLoading = false,
@@ -333,9 +335,15 @@ export default function   QueuePanel({
                   onTogglePlayback();
                 }}
                 disabled={!currentSong || isLoading}
-                className={`${isPlaying ? 'text-red-400' : 'text-green-400'} hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                className={`${isPlaying && queuedSong ? 'text-blue-400' : isPlaying ? 'text-red-400' : 'text-green-400'} hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                title={isPlaying && queuedSong ? 'Skip to queued song' : isPlaying ? 'Pause' : 'Play'}
               >
-                {isPlaying ? (
+                {isPlaying && queuedSong ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polygon points="5,4 15,12 5,20" fill="currentColor" />
+                    <line x1="19" y1="5" x2="19" y2="19" />
+                  </svg>
+                ) : isPlaying ? (
                   <div className="w-4 h-4 flex gap-1 items-center">
                     <div className="bg-current h-4 w-1.5"></div>
                     <div className="bg-current h-4 w-1.5"></div>
@@ -388,8 +396,8 @@ export default function   QueuePanel({
             </div>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {queueSongs.filter(song => song.id !== currentSong?.id).slice(0, 4).map((song, index) => (
-                <div 
-                  key={song.id} 
+                <div
+                  key={song.id}
                   className="flex items-center gap-3 py-1 px-0 cursor-pointer duration-300 hover:translate-x-0.5"
                   onClick={() => {
                     onSelectSong(song);
@@ -399,14 +407,21 @@ export default function   QueuePanel({
                     <img src="/lou-thumb.jpeg" alt="Album art" className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-white text-sm font-medium truncate">
-                      {song.title}
+                    <div className="flex items-center gap-2">
+                      <div className="text-white text-sm font-medium truncate">
+                        {song.title}
+                      </div>
+                      {queuedSong?.id === song.id && (
+                        <span className="text-blue-400 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-blue-400/20 rounded flex-shrink-0">
+                          QUEUED
+                        </span>
+                      )}
                     </div>
                     <div className="text-white/60 text-xs truncate">
                       {song.artist}
                     </div>
                   </div>
-                  <button 
+                  <button
                     className="text-white/60 hover:text-white transition-colors p-1"
                     onClick={(e) => {
                       e.stopPropagation();
