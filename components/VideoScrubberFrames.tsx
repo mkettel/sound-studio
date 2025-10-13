@@ -18,22 +18,22 @@ interface VideoScrubberFramesProps {
 // New transition-based frame mapping using actual frame numbers
 const frameSegments = {
   wideLoop: { start: 0, end: 29 },           // Wide position loop (frames 0000-0029)
-  wideToLeft: { start: 30, end: 78 },        // Wide → Left transition (frames 0030-0078)
-  leftLoop: { start: 79, end: 118 },         // Left position loop (frames 0079-0118)
-  leftToRight: { start: 119, end: 188 },     // Left → Right transition (frames 0119-0188)
-  rightLoop: { start: 189, end: 228 },       // Right position loop (frames 0189-0228)
-  rightToWide: { start: 229, end: 278 }      // Right → Wide transition (frames 0229-0278)
+  wideToLeft: { start: 30, end: 77 },        // Wide → Left transition (frames 0030-0077)
+  leftLoop: { start: 78, end: 119 },         // Left position loop (frames 0078-0119)
+  leftToRight: { start: 120, end: 187 },     // Left → Right transition (frames 0120-0187)
+  rightLoop: { start: 188, end: 229 },       // Right position loop (frames 0188-0229)
+  rightToWide: { start: 230, end: 279 }      // Right → Wide transition (frames 0230-0279)
 };
 
 // Map your sequence positions to frame ranges
 const defaultSegments: VideoSegment[] = [
   { id: "home", label: "HOME", frame: 0 },                    // Wide shot starting position
-  { id: "left-record", label: "LEFT RECORD", frame: 79 },     // Left turntable detail
-  { id: "right-record", label: "RIGHT RECORD", frame: 189 }   // Right turntable detail
+  { id: "left-record", label: "LEFT RECORD", frame: 78 },     // Left turntable detail
+  { id: "right-record", label: "RIGHT RECORD", frame: 188 }   // Right turntable detail
 ];
 
 export default function VideoScrubberFrames({
-  frameCount = 278,
+  frameCount = 279,
   segments = defaultSegments,
   isAppReady = false,
 }: VideoScrubberFramesProps) {
@@ -58,22 +58,22 @@ export default function VideoScrubberFrames({
   // Generate frame path using ultra-high quality frames with -q:v 3 compression
   const getFramePath = (index: number): string => {
     const frameNumber = index.toString().padStart(5, '0');
-    
+
     // Use ultra-quality frames for better visual quality
     if (index >= 0 && index <= 29) {
       return `/frames-ultra-quality/AUW Web Sequence wide loop Test 1/AUW Web Sequence wide loop Test 1_${frameNumber}.jpg`;
-    } else if (index >= 30 && index <= 78) {
+    } else if (index >= 30 && index <= 77) {
       return `/frames-ultra-quality/AUW Web Sequence transition wide to left Test 1/AUW Web Sequence transition wide to left Test 1_${frameNumber}.jpg`;
-    } else if (index >= 79 && index <= 118) {
+    } else if (index >= 78 && index <= 119) {
       return `/frames-ultra-quality/AUW Web Sequence loop left Test 1/AUW Web Sequence loop left Test 1_${frameNumber}.jpg`;
-    } else if (index >= 119 && index <= 188) {
+    } else if (index >= 120 && index <= 187) {
       return `/frames-ultra-quality/AUW Web Sequence transition left right Test 1/AUW Web Sequence transition left right Test 1_${frameNumber}.jpg`;
-    } else if (index >= 189 && index <= 228) {
+    } else if (index >= 188 && index <= 229) {
       return `/frames-ultra-quality/AUW Web Sequence loop right Test 1/AUW Web Sequence loop right Test 1_${frameNumber}.jpg`;
-    } else if (index >= 229 && index <= 278) {
+    } else if (index >= 230 && index <= 279) {
       return `/frames-ultra-quality/AUW Web Sequence Transition right to wide Test 1/AUW Web Sequence Transition right to wide Test 1_${frameNumber}.jpg`;
     }
-    
+
     // Fallback to first frame
     return `/frames-ultra-quality/AUW Web Sequence wide loop Test 1/AUW Web Sequence wide loop Test 1_00000.jpg`;
   };
@@ -122,11 +122,11 @@ export default function VideoScrubberFrames({
         // Wide loop: frames 0-29
         return Array.from({ length: 30 }, (_, i) => 0 + i);
       case "left-record":
-        // Left loop: frames 79-118  
-        return Array.from({ length: 40 }, (_, i) => 79 + i);
+        // Left loop: frames 78-119
+        return Array.from({ length: 42 }, (_, i) => 78 + i);
       case "right-record":
-        // Right loop: frames 189-228
-        return Array.from({ length: 40 }, (_, i) => 189 + i);
+        // Right loop: frames 188-229
+        return Array.from({ length: 42 }, (_, i) => 188 + i);
       default:
         return [0]; // Fallback to first frame
     }
@@ -135,27 +135,27 @@ export default function VideoScrubberFrames({
   // Get transition frames for movement between positions
   const getTransitionFrames = (from: string, to: string): number[] => {
     if (from === "home" && to === "left-record") {
-      // Wide to Left: frames 30-78
-      return Array.from({ length: 49 }, (_, i) => 30 + i);
+      // Wide to Left: frames 30-77
+      return Array.from({ length: 48 }, (_, i) => 30 + i);
     } else if (from === "left-record" && to === "home") {
-      // Left to Wide (reverse): frames 78-30
-      return Array.from({ length: 49 }, (_, i) => 78 - i);
+      // Left to Wide (reverse): frames 77-30
+      return Array.from({ length: 48 }, (_, i) => 77 - i);
     } else if (from === "left-record" && to === "right-record") {
-      // Left to Right: frames 119-188
-      return Array.from({ length: 70 }, (_, i) => 119 + i);
+      // Left to Right: frames 120-187
+      return Array.from({ length: 68 }, (_, i) => 120 + i);
     } else if (from === "right-record" && to === "left-record") {
-      // Right to Left (reverse): frames 188-119
-      return Array.from({ length: 70 }, (_, i) => 188 - i);
+      // Right to Left (reverse): frames 187-120
+      return Array.from({ length: 68 }, (_, i) => 187 - i);
     } else if (from === "right-record" && to === "home") {
-      // Right to Wide: frames 229-278, then jump back to wide start
-      const rightToWideFrames = Array.from({ length: 50 }, (_, i) => 229 + i);
+      // Right to Wide: frames 230-279, then jump back to wide start
+      const rightToWideFrames = Array.from({ length: 50 }, (_, i) => 230 + i);
       return [...rightToWideFrames, 0]; // End at wide position
     } else if (from === "home" && to === "right-record") {
       // Wide to Right: We need to go through left first, or create direct path
       // For now, let's create a direct wide-to-right path using reverse of right-to-wide
-      return Array.from({ length: 50 }, (_, i) => 278 - i);
+      return Array.from({ length: 50 }, (_, i) => 279 - i);
     }
-    
+
     return []; // No transition needed
   };
 
@@ -400,9 +400,9 @@ export default function VideoScrubberFrames({
                 <button
                   onClick={() => {
                     if (activeSegment === 'home') {
-                      navigateToSegment({ id: 'left-record', label: 'LEFT RECORD', frame: 79 });
+                      navigateToSegment({ id: 'left-record', label: 'LEFT RECORD', frame: 78 });
                     } else if (activeSegment === 'right-record') {
-                      navigateToSegment({ id: 'left-record', label: 'LEFT RECORD', frame: 79 });
+                      navigateToSegment({ id: 'left-record', label: 'LEFT RECORD', frame: 78 });
                     }
                     // Don't do anything if already at left-record
                   }}
@@ -461,9 +461,9 @@ export default function VideoScrubberFrames({
                 <button
                   onClick={() => {
                     if (activeSegment === 'home') {
-                      navigateToSegment({ id: 'right-record', label: 'RIGHT RECORD', frame: 189 });
+                      navigateToSegment({ id: 'right-record', label: 'RIGHT RECORD', frame: 188 });
                     } else if (activeSegment === 'left-record') {
-                      navigateToSegment({ id: 'right-record', label: 'RIGHT RECORD', frame: 189 });
+                      navigateToSegment({ id: 'right-record', label: 'RIGHT RECORD', frame: 188 });
                     }
                     // Don't do anything if already at right-record
                   }}
