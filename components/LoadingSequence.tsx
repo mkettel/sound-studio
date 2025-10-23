@@ -23,7 +23,7 @@ export default function LoadingSequence({ onComplete }: LoadingSequenceProps) {
       for (let i = 0; i < totalFrames; i++) {
         const frameNumber = i.toString().padStart(2, '0');
         const img = new Image();
-        img.src = `/loader-lp-auw-optimized/AUS x LP LE - loader${frameNumber}.jpg`;
+        img.src = `/loader-lp-auw-webp/AUS x LP LE - loader${frameNumber}.webp`;
         promises.push(
           new Promise((resolve) => {
             img.onload = resolve;
@@ -66,7 +66,7 @@ export default function LoadingSequence({ onComplete }: LoadingSequenceProps) {
   }, [onComplete, totalFrames, frameDuration]);
 
   const frameNumber = currentFrame.toString().padStart(2, '0');
-  const imageSrc = `/loader-lp-auw-optimized/AUS x LP LE - loader${frameNumber}.jpg`;
+  const imageSrc = `/loader-lp-auw-webp/AUS x LP LE - loader${frameNumber}.webp`;
 
   return (
     <div 

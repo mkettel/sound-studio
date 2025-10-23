@@ -55,27 +55,27 @@ export default function VideoScrubberFrames({
   const frameController = useRef({ frame: 0 });
   const tlRef = useRef<gsap.core.Timeline | null>(null);
 
-  // Generate frame path using ultra-high quality frames with -q:v 3 compression
+  // Generate frame path using WebP compressed frames
   const getFramePath = (index: number): string => {
     const frameNumber = index.toString().padStart(5, '0');
 
-    // Use ultra-quality frames for better visual quality
+    // Use WebP frames for better compression and quality
     if (index >= 0 && index <= 29) {
-      return `/frames-ultra-quality/AUW Web Sequence wide loop Test 1/AUW Web Sequence wide loop Test 1_${frameNumber}.jpg`;
+      return `/frames-ultra-quality-webp/AUW Web Sequence wide loop Test 1/AUW Web Sequence wide loop Test 1_${frameNumber}.webp`;
     } else if (index >= 30 && index <= 77) {
-      return `/frames-ultra-quality/AUW Web Sequence transition wide to left Test 1/AUW Web Sequence transition wide to left Test 1_${frameNumber}.jpg`;
+      return `/frames-ultra-quality-webp/AUW Web Sequence transition wide to left Test 1/AUW Web Sequence transition wide to left Test 1_${frameNumber}.webp`;
     } else if (index >= 78 && index <= 119) {
-      return `/frames-ultra-quality/AUW Web Sequence loop left Test 1/AUW Web Sequence loop left Test 1_${frameNumber}.jpg`;
+      return `/frames-ultra-quality-webp/AUW Web Sequence loop left Test 1/AUW Web Sequence loop left Test 1_${frameNumber}.webp`;
     } else if (index >= 120 && index <= 187) {
-      return `/frames-ultra-quality/AUW Web Sequence transition left right Test 1/AUW Web Sequence transition left right Test 1_${frameNumber}.jpg`;
+      return `/frames-ultra-quality-webp/AUW Web Sequence transition left right Test 1/AUW Web Sequence transition left right Test 1_${frameNumber}.webp`;
     } else if (index >= 188 && index <= 229) {
-      return `/frames-ultra-quality/AUW Web Sequence loop right Test 1/AUW Web Sequence loop right Test 1_${frameNumber}.jpg`;
+      return `/frames-ultra-quality-webp/AUW Web Sequence loop right Test 1/AUW Web Sequence loop right Test 1_${frameNumber}.webp`;
     } else if (index >= 230 && index <= 279) {
-      return `/frames-ultra-quality/AUW Web Sequence Transition right to wide Test 1/AUW Web Sequence Transition right to wide Test 1_${frameNumber}.jpg`;
+      return `/frames-ultra-quality-webp/AUW Web Sequence Transition right to wide Test 1/AUW Web Sequence Transition right to wide Test 1_${frameNumber}.webp`;
     }
 
     // Fallback to first frame
-    return `/frames-ultra-quality/AUW Web Sequence wide loop Test 1/AUW Web Sequence wide loop Test 1_00000.jpg`;
+    return `/frames-ultra-quality-webp/AUW Web Sequence wide loop Test 1/AUW Web Sequence wide loop Test 1_00000.webp`;
   };
 
   // Render function (back to simple scaling)
