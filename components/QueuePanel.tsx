@@ -15,6 +15,8 @@ interface QueuePanelProps {
   queueSongs?: Song[];
   isPlaying?: boolean;
   isLoading?: boolean;
+  isMobileMinimized?: boolean; // Control mobile minimized state from parent
+  onMobileMinimizedChange?: (minimized: boolean) => void; // Notify parent of minimized state changes
   onToggleExpanded?: () => void;
   onRemoveSong?: (songId: string) => void;
   onSelectSong?: (song: Song) => void; // New: handle song selection
@@ -34,6 +36,8 @@ export default function   QueuePanel({
   queueSongs = [],
   isPlaying = false,
   isLoading = false,
+  isMobileMinimized: isMobileMinimizedProp,
+  onMobileMinimizedChange,
   onToggleExpanded = () => {},
   onRemoveSong = () => {},
   onSelectSong = () => {}, // New callback
@@ -52,7 +56,17 @@ export default function   QueuePanel({
   const [liveProgress, setLiveProgress] = useState(0);
   const [currentSongId, setCurrentSongId] = useState<string | null>(null);
   const isMobile = useIsMobile();
-  const [isMobileMinimized, setIsMobileMinimized] = useState(true); // Start minimized on mobile
+
+  // Use controlled state from parent if provided, otherwise use internal state
+  const [internalMobileMinimized, setInternalMobileMinimized] = useState(true);
+  const isMobileMinimized = isMobileMinimizedProp !== undefined ? isMobileMinimizedProp : internalMobileMinimized;
+  const setIsMobileMinimized = (minimized: boolean) => {
+    if (onMobileMinimizedChange) {
+      onMobileMinimizedChange(minimized);
+    } else {
+      setInternalMobileMinimized(minimized);
+    }
+  };
 
   // Animate expand/collapse
   useEffect(() => {
@@ -218,7 +232,7 @@ export default function   QueuePanel({
   if (isMobile && isMobileMinimized) {
     return (
       <div 
-        className={`fixed top-5 ${position === 'left' ? 'left-4' : 'right-4'} z-40 w-14 h-14 cursor-pointer`}
+        className={`fixed top-2 ${position === 'left' ? 'left-2' : 'right-2'} z-40 w-14 h-14 cursor-pointer`}
         onClick={() => setIsMobileMinimized(false)}
       >
         <div className="bg-black/50 backdrop-blur-sm border border-white/60  w-full h-full flex items-center justify-center">
@@ -231,7 +245,7 @@ export default function   QueuePanel({
   }
 
   return (
-    <div className={`fixed ${isMobile ? `top-4 ${position === 'left' ? 'left-4   mr-2' : 'right-4 ml-2'} max-w-none` : `top-6 ${position === 'left' ? 'left-6' : 'right-6'} max-w-72 min-w-72`} z-40`}>
+    <div className={`fixed ${isMobile ? `top-2 ${position === 'left' ? 'left-2   mr-2' : 'right-2 ml-2'} max-w-none` : `top-6 ${position === 'left' ? 'left-6' : 'right-6'} max-w-72 min-w-72`} z-40`}>
       <div className="bg-black/30 backdrop-blur-sm border border-white/90 min-h-40 overflow-hidden">
         {/* Header with toggle */}
         <div 

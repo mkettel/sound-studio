@@ -4,6 +4,7 @@ import { useDJEngine, Song } from '@/hooks/useDJEngine';
 import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import QueuePanel from './QueuePanel';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface DJControlsProps {
   djState?: any;
@@ -51,9 +52,12 @@ export default function DJControls({
 }: DJControlsProps) {
   const [leftQueueExpanded, setLeftQueueExpanded] = useState(false);
   const [rightQueueExpanded, setRightQueueExpanded] = useState(false);
+  const [leftMobileMinimized, setLeftMobileMinimized] = useState(true);
+  const [rightMobileMinimized, setRightMobileMinimized] = useState(true);
   const leftQueueRef = useRef<HTMLDivElement>(null);
   const rightQueueRef = useRef<HTMLDivElement>(null);
   const crossfaderRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   // Animate components in when app is ready
   useEffect(() => {
@@ -215,7 +219,21 @@ export default function DJControls({
             queueSongs={leftDeckSongs}
             isPlaying={djState?.leftDeck.isPlaying}
             isLoading={djState?.leftDeck.isLoading}
-            onToggleExpanded={() => setLeftQueueExpanded(!leftQueueExpanded)}
+            isMobileMinimized={leftMobileMinimized}
+            onMobileMinimizedChange={(minimized) => {
+              setLeftMobileMinimized(minimized);
+              // On mobile, when expanding left panel, minimize the right panel
+              if (isMobile && !minimized) {
+                setRightMobileMinimized(true);
+              }
+            }}
+            onToggleExpanded={() => {
+              setLeftQueueExpanded(!leftQueueExpanded);
+              // On mobile, close the right panel when opening the left panel
+              if (isMobile && !leftQueueExpanded) {
+                setRightQueueExpanded(false);
+              }
+            }}
             onRemoveSong={(songId) => {}}
             onSelectSong={onLeftSelectSong}
             onTogglePlayback={onLeftTogglePlayback}
@@ -237,7 +255,21 @@ export default function DJControls({
             queueSongs={rightDeckSongs}
             isPlaying={djState?.rightDeck.isPlaying}
             isLoading={djState?.rightDeck.isLoading}
-            onToggleExpanded={() => setRightQueueExpanded(!rightQueueExpanded)}
+            isMobileMinimized={rightMobileMinimized}
+            onMobileMinimizedChange={(minimized) => {
+              setRightMobileMinimized(minimized);
+              // On mobile, when expanding right panel, minimize the left panel
+              if (isMobile && !minimized) {
+                setLeftMobileMinimized(true);
+              }
+            }}
+            onToggleExpanded={() => {
+              setRightQueueExpanded(!rightQueueExpanded);
+              // On mobile, close the left panel when opening the right panel
+              if (isMobile && !rightQueueExpanded) {
+                setLeftQueueExpanded(false);
+              }
+            }}
             onRemoveSong={(songId) => {}}
             onSelectSong={onRightSelectSong}
             onTogglePlayback={onRightTogglePlayback}
